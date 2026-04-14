@@ -443,6 +443,8 @@ function startLive() {
   });
 }
 
+const SERVED_HIDE_MINUTES = 30; // hide served orders after this many minutes
+
 window.loadMyOrders = async () => {
   const el = document.getElementById('my-orders-list');
   el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">Loading...</div>';
@@ -450,17 +452,43 @@ window.loadMyOrders = async () => {
     const snap = await getDocs(query(collection(db,'orders'), where('tableNumber','==', String(tableNum))));
     if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">No orders yet for Table '+tableNum+'. Place your first order!</div>'; return; }
     const sMap = {pending:'s-pending',preparing:'s-preparing',ready:'s-ready',served:'s-served'};
+    const now = Date.now();
     const docs = snap.docs.map(d => ({...d.data(), _id: d.id}));
-    docs.sort((a,b) => {
+
+    // Filter: hide served orders older than SERVED_HIDE_MINUTES
+    const visible = docs.filter(o => {
+      if (o.status === 'served') {
+        const orderedTime = o.orderedAt ? new Date(o.orderedAt).getTime() : 0;
+        const minutesAgo = (now - orderedTime) / (1000 * 60);
+        return minutesAgo < SERVED_HIDE_MINUTES;
+      }
+      return true; // always show pending, preparing, ready
+    });
+
+    // Sort newest first
+    visible.sort((a,b) => {
       const ta = a.orderedAt ? new Date(a.orderedAt).getTime() : 0;
       const tb = b.orderedAt ? new Date(b.orderedAt).getTime() : 0;
       return tb - ta;
     });
-    el.innerHTML = docs.map(o => {
+
+    if (!visible.length) {
+      el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">✅</div><p style="font-weight:500;margin-bottom:4px">All orders completed!</p><p style="font-size:12px">Your orders have been served. Thank you for dining at My Dhawath!</p></div>';
+      return;
+    }
+
+    el.innerHTML = visible.map(o => {
       const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '—';
       const items = (o.items||[]).map(i => i.name+(i.variant?' ('+i.variant+')':'')+' ×'+i.qty).join(' · ');
       const sp = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
-      return `<div class="order-card"><div class="oc-top"><span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span><span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span></div><div class="oc-items-text">${items}</div>${sp}<div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}</span></div></div>`;
+      // Show countdown for served orders still in the hide window
+      let servedNote = '';
+      if (o.status === 'served') {
+        const orderedTime = o.orderedAt ? new Date(o.orderedAt).getTime() : 0;
+        const minsLeft = Math.ceil(SERVED_HIDE_MINUTES - (now - orderedTime) / (1000 * 60));
+        servedNote = `<div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic">Disappears in ~${minsLeft} min</div>`;
+      }
+      return `<div class="order-card"><div class="oc-top"><span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span><span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span></div><div class="oc-items-text">${items}</div>${sp}${servedNote}<div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}</span></div></div>`;
     }).join('');
   } catch(e) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">Error: '+e.message+'</div>'; }
 };
