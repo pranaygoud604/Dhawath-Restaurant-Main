@@ -325,7 +325,9 @@ window.toggleItem = function(id, enabled) {
 
 function renderCard(o, editable) {
   const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', 'pending-payment': 's-pending-payment', paid: 's-paid', cancelled: 's-cancelled' };
-  const statuses = ['pending', 'preparing', 'ready', 'served', 'pending-payment', 'paid'];
+  const kitchenStatuses = ['pending', 'preparing', 'ready', 'served'];
+  const paymentStatuses = ['pending-payment', 'paid'];
+  const currentStatuses = (o.status === 'pending-payment' || o.status === 'paid') ? paymentStatuses : kitchenStatuses;
   const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—';
   const isUrgent = o.status === 'pending' && o.orderedAt && (Date.now() - new Date(o.orderedAt).getTime()) > 10 * 60 * 1000;
   const isPendingPayment = o.status === 'pending-payment';
@@ -333,7 +335,7 @@ function renderCard(o, editable) {
   const special = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
   const statusBtns = editable ? `
     <div class="status-btns">
-      ${statuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="setStatus('${o._id}','${s}')">${s}</button>`).join('')}
+      ${currentStatuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="setStatus('${o._id}','${s}')">${s}</button>`).join('')}
       <button class="s-btn cancel${o.status==='cancelled'?' active':''}" onclick="setStatus('${o._id}','cancelled')">cancel</button>
     </div>` : '';
   return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
@@ -350,7 +352,11 @@ function renderCard(o, editable) {
 }
 
 window.setStatus = async function(id, status) {
-  try { await updateDoc(doc(db, 'orders', id), { status }); }
+  try { 
+    // Auto-transition: when order is marked "served", automatically set to "pending-payment"
+    const finalStatus = (status === 'served') ? 'pending-payment' : status;
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
+  }
   catch(e) { alert('Error: ' + e.message); }
 };
 
