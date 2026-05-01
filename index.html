@@ -339,12 +339,14 @@ async function loadMenuItemStates() {
   }
 }
 
-// Table grid - Indoor, Outdoor, Parcels
+// Table grid - Indoor, Outdoor, Parcels with proper layout
 const grid = document.getElementById('table-grid');
+grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
 
-// Indoor Tables
+// Indoor Tables Section
 const indoorLabel = document.createElement('div');
-indoorLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">🏠 INDOOR TABLES</h3>';
+indoorLabel.style.cssText = 'grid-column: 1 / -1; font-size: 14px; color: var(--muted); margin: 15px 0 10px 0; font-weight: 600; display: flex; align-items: center; gap: 8px;';
+indoorLabel.innerHTML = '🏠 INDOOR TABLES (1-12)';
 grid.appendChild(indoorLabel);
 
 for (let i = 1; i <= 12; i++) {
@@ -355,9 +357,10 @@ for (let i = 1; i <= 12; i++) {
   grid.appendChild(b);
 }
 
-// Outdoor Tables
+// Outdoor Tables Section
 const outdoorLabel = document.createElement('div');
-outdoorLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">🌳 OUTDOOR TABLES</h3>';
+outdoorLabel.style.cssText = 'grid-column: 1 / -1; font-size: 14px; color: var(--muted); margin: 15px 0 10px 0; font-weight: 600; display: flex; align-items: center; gap: 8px;';
+outdoorLabel.innerHTML = '🌳 OUTDOOR TABLES (1-10)';
 grid.appendChild(outdoorLabel);
 
 for (let i = 1; i <= 10; i++) {
@@ -368,9 +371,10 @@ for (let i = 1; i <= 10; i++) {
   grid.appendChild(b);
 }
 
-// Parcels (Takeaway)
+// Parcels Section
 const parcelLabel = document.createElement('div');
-parcelLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">📦 PARCELS (TAKEAWAY)</h3>';
+parcelLabel.style.cssText = 'grid-column: 1 / -1; font-size: 14px; color: var(--muted); margin: 15px 0 10px 0; font-weight: 600; display: flex; align-items: center; gap: 8px;';
+parcelLabel.innerHTML = '📦 PARCELS / TAKEAWAY';
 grid.appendChild(parcelLabel);
 
 for (let i = 1; i <= 3; i++) {
