@@ -338,7 +338,7 @@ async function loadMenuItemStates() {
   try {
     const snap = await getDocs(collection(db, 'menuItems'));
     snap.forEach(doc => {
-      menuItemStates[doc.id] = doc.data().enabled !== false; // default to enabled
+      menuItemStates[String(doc.id)] = doc.data().enabled !== false; // Store as string
     });
   } catch(e) {
     console.log('Menu states loaded (or not found)');
@@ -406,7 +406,7 @@ function buildMenu() {
   const nav = document.getElementById('cat-nav'); const mc = document.getElementById('menu-content');
   nav.innerHTML = ''; mc.innerHTML = '';
   MENU.forEach((sec, i) => {
-    const hasAnyEnabled = sec.items.some(item => menuItemStates[item.id] !== false);
+    const hasAnyEnabled = sec.items.some(item => menuItemStates[String(item.id)] !== false);
     if (!hasAnyEnabled) return; // Skip categories with all items disabled
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (i === 0 ? ' active' : ''); btn.textContent = sec.cat;
@@ -414,7 +414,7 @@ function buildMenu() {
     nav.appendChild(btn);
     const div = document.createElement('div'); div.id = 's' + sec.cat.replace(/\W/g, '');
     div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${sec.items.map(item => {
-      const isEnabled = menuItemStates[item.id] !== false;
+      const isEnabled = menuItemStates[String(item.id)] !== false;
       return isEnabled ? renderItem(item) : renderDisabledItem(item);
     }).join('')}</div>`;
     mc.appendChild(div);
@@ -534,7 +534,7 @@ function startLive() {
   // Listen for menu changes in real-time
   onSnapshot(collection(db,'menuItems'), snap => {
     snap.forEach(doc => {
-      menuItemStates[doc.id] = doc.data().enabled !== false;
+      menuItemStates[String(doc.id)] = doc.data().enabled !== false;
     });
     if (document.getElementById('menu-view').style.display === 'grid') buildMenu();
   });
