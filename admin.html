@@ -59,7 +59,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .s-preparing{background:#E6F1FB;color:#185FA5}
 .s-ready{background:#EAF3DE;color:#3B6D11}
 .s-served{background:#F1EFE8;color:#5F5E5A}
+.s-pending-payment{background:#FFE6E6;color:var(--danger);font-weight:600}
+.s-paid{background:#D4EDDA;color:#155724;font-weight:600}
 .s-cancelled{background:#FCEBEB;color:#A32D2D}
+.order-card.pending-payment{border-left:4px solid var(--danger);background:#FFF5F5}
 .oc-items{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.7}
 .oc-item-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)}
 .oc-item-row:last-child{border:none}
@@ -123,6 +126,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="tabs">
   <div class="tab active" onclick="showView('kitchen',this)">🍳 Kitchen</div>
   <div class="tab" onclick="showView('all-orders',this)">📋 All Orders</div>
+  <div class="tab" onclick="showView('pending-orders',this)">💳 Pending Payments</div>
   <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
   <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
@@ -132,7 +136,8 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="stat-orders">—</div></div>
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
-  <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="stat-pending">—</div></div>
+  <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
+  <div class="stat-card"><div class="stat-label">💳 Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
   <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
@@ -159,6 +164,15 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
     <button class="refresh-btn" onclick="loadAllOrders()">↻ Refresh</button>
   </div>
   <div id="all-orders-list"><div class="no-orders"><p>Loading...</p></div></div>
+</div>
+
+<!-- PENDING PAYMENTS -->
+<div class="view" id="view-pending-orders">
+  <div class="view-header">
+    <h2>💳 Pending Payments</h2>
+    <button class="refresh-btn" onclick="loadPendingOrders()">↻ Refresh</button>
+  </div>
+  <div id="pending-orders-list"><div class="no-orders"><p>No pending payments</p></div></div>
 </div>
 
 <!-- TABLES -->
@@ -226,6 +240,10 @@ function startLive() {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
+    // Also update pending orders view if it's currently active
+    if (document.getElementById('view-pending-orders').classList.contains('active')) {
+      loadPendingOrders();
+    }
   });
 }
 
@@ -244,10 +262,12 @@ function updateStats() {
   const paidOrders = todayOrders.filter(o => o.status === 'paid');
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
+  const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
   const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-pending-payment').textContent = pendingPayment;
   document.getElementById('stat-tables').textContent = tables;
 }
 
@@ -258,6 +278,13 @@ window.loadAllOrders = async function() {
   const snap = await getDocs(q);
   if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
+};
+
+window.loadPendingOrders = function() {
+  const el = document.getElementById('pending-orders-list');
+  const pending = allOrders.filter(o => o.status === 'pending-payment');
+  if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
+  el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
 
 window.loadTables = function() {
@@ -297,10 +324,11 @@ window.toggleItem = function(id, enabled) {
 };
 
 function renderCard(o, editable) {
-  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', cancelled: 's-cancelled' };
-  const statuses = ['pending', 'preparing', 'ready', 'served'];
+  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', 'pending-payment': 's-pending-payment', paid: 's-paid', cancelled: 's-cancelled' };
+  const statuses = ['pending', 'preparing', 'ready', 'served', 'pending-payment', 'paid'];
   const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—';
   const isUrgent = o.status === 'pending' && o.orderedAt && (Date.now() - new Date(o.orderedAt).getTime()) > 10 * 60 * 1000;
+  const isPendingPayment = o.status === 'pending-payment';
   const itemRows = o.items ? o.items.map(i => `<div class="oc-item-row"><span>${i.emoji||''} ${i.name} ×${i.qty}</span><span>₹${i.lineTotal||i.price*i.qty}</span></div>`).join('') : '';
   const special = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
   const statusBtns = editable ? `
@@ -308,7 +336,7 @@ function renderCard(o, editable) {
       ${statuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="setStatus('${o._id}','${s}')">${s}</button>`).join('')}
       <button class="s-btn cancel${o.status==='cancelled'?' active':''}" onclick="setStatus('${o._id}','cancelled')">cancel</button>
     </div>` : '';
-  return `<div class="order-card${isUrgent?' urgent':''}">
+  return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
     <div class="oc-top">
       <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
       <span class="oc-table">Table ${o.tableNumber}</span>
@@ -316,7 +344,7 @@ function renderCard(o, editable) {
     </div>
     ${itemRows}
     ${special}
-    <div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}${isUrgent?' ⚠️ Urgent':''}</span></div>
+    <div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}${isUrgent?' ⚠️ Urgent':''}${isPendingPayment?' 💳 Payment Pending':''}</span></div>
     ${statusBtns}
   </div>`;
 }
@@ -339,6 +367,7 @@ window.showView = function(view, el) {
   document.getElementById('view-' + view).classList.add('active');
   el.classList.add('active');
   if (view === 'all-orders') loadAllOrders();
+  if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
 };
 
