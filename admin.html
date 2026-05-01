@@ -206,23 +206,75 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const MENU = [
-  {cat:'Starters',items:[
-    {id:1,name:'Mutton Seekh Kebab',price:320,emoji:'🥩'},{id:2,name:'Chicken Shami Kebab',price:260,emoji:'🍗'},
-    {id:3,name:'Veg Crispy Corn',price:180,emoji:'🌽'},{id:4,name:'Paneer Tikka',price:240,emoji:'🧀'},{id:5,name:'Fish Amritsari',price:340,emoji:'🐟'}]},
-  {cat:'Biryani',items:[
-    {id:6,name:'Hyderabadi Dum Biryani',price:380,emoji:'🍚'},{id:7,name:'Chicken Biryani',price:320,emoji:'🍛'},
-    {id:8,name:'Veg Biryani',price:240,emoji:'🌿'},{id:9,name:'Prawn Biryani',price:420,emoji:'🦐'}]},
-  {cat:'Curries',items:[
-    {id:10,name:'Butter Chicken',price:300,emoji:'🍲'},{id:11,name:'Rogan Josh',price:360,emoji:'🥘'},
-    {id:12,name:'Dal Makhani',price:220,emoji:'🫘'},{id:13,name:'Palak Paneer',price:240,emoji:'🍃'},{id:14,name:'Prawn Masala',price:380,emoji:'🦐'}]},
-  {cat:'Breads',items:[
-    {id:15,name:'Butter Naan',price:60,emoji:'🫓'},{id:16,name:'Garlic Roti',price:55,emoji:'🫓'},
-    {id:17,name:'Paratha',price:70,emoji:'🫓'},{id:18,name:'Laccha Paratha',price:80,emoji:'🫓'}]},
-  {cat:'Beverages',items:[
-    {id:19,name:'Mango Lassi',price:120,emoji:'🥭'},{id:20,name:'Masala Chai',price:60,emoji:'☕'},
-    {id:21,name:'Fresh Lime Soda',price:80,emoji:'🍋'},{id:22,name:'Rose Sharbat',price:100,emoji:'🌹'}]},
-  {cat:'Desserts',items:[
-    {id:23,name:'Gulab Jamun',price:120,emoji:'🍮'},{id:24,name:'Phirni',price:140,emoji:'🥣'},{id:25,name:'Double Ka Meetha',price:160,emoji:'🍞'}]}
+  { cat:'Biryani 🍚', items:[
+    { id:1,  name:'Biryani',           desc:'Classic chicken biryani',                    badges:['nv'],        variants:[{l:'Half',p:140},{l:'Full',p:220},{l:'Party',p:520}] },
+    { id:2,  name:'Fry Piece Biryani', desc:'Biryani with crispy fried chicken pieces',   badges:['nv','pop'],  variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
+    { id:3,  name:'Paneer Biryani',    desc:'Fragrant biryani with soft paneer',          badges:['veg'],       variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
+    { id:4,  name:'Gongura C Biryani', desc:'Tangy Gongura chicken biryani',              badges:['nv'],        variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
+    { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
+  ]},
+  { cat:'Rice & Noodles 🍜', items:[
+    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
+    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
+    { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
+    { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
+    { id:10, name:'Egg Noodles',       desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
+    { id:11, name:'Chicken Noodles',   desc:'Stir-fried noodles with chicken',            badges:['nv'],        price:90 },
+    { id:12, name:'Veg Noodles',       desc:'Stir-fried noodles with vegetables',         badges:['veg'],       price:60 },
+  ]},
+  { cat:'Starters 🔥', items:[
+    { id:13, name:'Chicken Manchuria', desc:'Crispy chicken in spicy Manchurian sauce',   badges:['nv','pop'],  price:150 },
+    { id:14, name:'Veg Manchuria',     desc:'Crispy veggie balls in spicy sauce',         badges:['veg'],       price:80 },
+    { id:15, name:'Egg Burji',         desc:'Spiced scrambled eggs',                      badges:['egg'],       price:100 },
+    { id:16, name:'Egg 65',            desc:'Crispy spiced fried eggs',                   badges:['egg'],       variants:[{l:'Half',p:65},{l:'Full',p:110}] },
+    { id:17, name:'Egg Chilli',        desc:'Eggs tossed with peppers and soy sauce',     badges:['egg'],       price:110 },
+    { id:18, name:'Egg Manchurian',    desc:'Eggs in tangy Manchurian gravy',             badges:['egg'],       price:100 },
+    { id:19, name:'Egg Keema',         desc:'Spiced minced egg masala',                   badges:['egg'],       price:100 },
+    { id:20, name:'Corn Fry',          desc:'Crispy fried sweet corn',                    badges:['veg'],       price:120 },
+  ]},
+  { cat:'Chicken Specials 🍗', items:[
+    { id:21, name:'Chicken Wings',     desc:'Spicy wings — 6 pieces',                     badges:['nv','pop'],  price:100 },
+    { id:22, name:'Chicken Lollipops', desc:'Juicy crispy chicken lollipops',              badges:['nv','pop'],  price:150 },
+    { id:23, name:'Chicken Pakodi',    desc:'Crispy chicken fritters',                    badges:['nv'],        variants:[{l:'Single',p:100},{l:'Full',p:150}] },
+    { id:24, name:'Chicken Roast',     desc:'Spicy roasted chicken pieces',               badges:['nv'],        variants:[{l:'Single',p:100},{l:'Full',p:160}] },
+    { id:25, name:'Chicken 65',        desc:'Classic deep-fried spicy chicken',           badges:['nv','pop'],  variants:[{l:'Single',p:100},{l:'Full',p:160}] },
+    { id:26, name:'Chicken Chilli',    desc:'Tender chicken with green chillies',         badges:['nv'],        variants:[{l:'Single',p:100},{l:'Full',p:160}] },
+    { id:27, name:'C. Telangana Curry',desc:'Spicy Telangana style chicken curry',        badges:['nv','pop'],  price:160 },
+    { id:28, name:'Chicken Curry',     desc:'Home-style chicken curry',                   badges:['nv'],        price:150 },
+  ]},
+  { cat:'Paneer 🧀', items:[
+    { id:29, name:'Paneer Masala',     desc:'Paneer in rich spiced tomato gravy',         badges:['veg','pop'],  price:180 },
+    { id:30, name:'Paneer Curry',      desc:'Soft paneer in flavourful curry',            badges:['veg'],        price:160 },
+  ]},
+  { cat:'Sea & Meat 🐟', items:[
+    { id:31, name:'Fish Fry',          desc:'Crispy spiced fried fish',                   badges:['nv'],        price:120 },
+    { id:32, name:'Boti',              desc:'Tender mutton boti pieces',                  badges:['nv'],        price:150 },
+    { id:33, name:'Head Curry',        desc:'Spiced goat head curry',                     badges:['nv'],        price:180 },
+  ]},
+  { cat:'Breads 🫓', items:[
+    { id:34, name:'Chapathi',          desc:'Soft whole wheat flatbread — per piece',     badges:['veg'],        price:10 },
+  ]},
+  { cat:'Beverages 🥤', items:[
+    { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
+    { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
+    { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
+    { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
+    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
+    { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
+  ]},
+  { cat:'Smokes 🚬', items:[
+    { id:44, name:'Kings',             desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:45, name:'Lights',            desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:46, name:'Gold Flak',         desc:'Small cigarettes',                           badges:['nv'],        price:15 },
+    { id:47, name:'Connects',          desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:48, name:'Bistal',            desc:'Cigarettes',                                 badges:['nv'],        price:15 },
+    { id:49, name:'American Club',     desc:'Cigarettes',                                 badges:['nv'],        price:20 },
+    { id:50, name:'Silk',              desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:51, name:'Advance',           desc:'Small cigarettes',                           badges:['nv'],        price:16 },
+  ]},
 ];
 
 let allOrders = [], kitchenFilter = 'all';
