@@ -176,7 +176,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -292,8 +292,14 @@ function buildMenuMgmt() {
     </div>`).join('');
 }
 
-window.toggleItem = function(id, enabled) {
-  console.log('Item', id, enabled ? 'enabled' : 'disabled');
+window.toggleItem = async function(id, enabled) {
+  try {
+    await setDoc(doc(db, 'menuItems', String(id)), { id, enabled }, { merge: true });
+    console.log('Item', id, enabled ? 'enabled' : 'disabled');
+  } catch(e) {
+    console.error('Error updating item:', e);
+    alert('Failed to update item');
+  }
 };
 
 function renderCard(o, editable) {
