@@ -339,12 +339,45 @@ async function loadMenuItemStates() {
   }
 }
 
-// Table grid
+// Table grid - Indoor, Outdoor, Parcels
 const grid = document.getElementById('table-grid');
-for (let i = 1; i <= 16; i++) {
+
+// Indoor Tables
+const indoorLabel = document.createElement('div');
+indoorLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">🏠 INDOOR TABLES</h3>';
+grid.appendChild(indoorLabel);
+
+for (let i = 1; i <= 12; i++) {
   const b = document.createElement('button');
-  b.className = 'tbl-btn'; b.textContent = 'T' + i;
-  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = String(i); };
+  b.className = 'tbl-btn';
+  b.textContent = 'I' + i;
+  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = 'I' + i; };
+  grid.appendChild(b);
+}
+
+// Outdoor Tables
+const outdoorLabel = document.createElement('div');
+outdoorLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">🌳 OUTDOOR TABLES</h3>';
+grid.appendChild(outdoorLabel);
+
+for (let i = 1; i <= 10; i++) {
+  const b = document.createElement('button');
+  b.className = 'tbl-btn';
+  b.textContent = 'O' + i;
+  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = 'O' + i; };
+  grid.appendChild(b);
+}
+
+// Parcels (Takeaway)
+const parcelLabel = document.createElement('div');
+parcelLabel.innerHTML = '<h3 style="grid-column:1/-1;font-size:12px;color:var(--muted);margin:10px 0 5px 0">📦 PARCELS (TAKEAWAY)</h3>';
+grid.appendChild(parcelLabel);
+
+for (let i = 1; i <= 3; i++) {
+  const b = document.createElement('button');
+  b.className = 'tbl-btn';
+  b.textContent = 'P' + i;
+  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = 'P' + i; };
   grid.appendChild(b);
 }
 
