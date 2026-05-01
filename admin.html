@@ -241,7 +241,8 @@ function renderKitchen() {
 function updateStats() {
   const today = new Date().toDateString();
   const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
-  const revenue = todayOrders.reduce((a, o) => a + (o.total || 0), 0);
+  const paidOrders = todayOrders.filter(o => o.status === 'paid');
+  const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
   const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;

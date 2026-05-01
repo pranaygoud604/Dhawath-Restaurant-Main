@@ -180,9 +180,10 @@ function filterByRange(orders) {
 function renderAll() {
   const orders = filterByRange(allOrders);
   const served = orders.filter(o => o.status !== 'cancelled');
-  const revenue = served.reduce((a, o) => a + (o.total || 0), 0);
+  const paidOrders = orders.filter(o => o.status === 'paid');
+  const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const totalItems = served.reduce((a, o) => a + (o.items ? o.items.reduce((b, i) => b + i.qty, 0) : 0), 0);
-  const avg = served.length ? Math.round(revenue / served.length) : 0;
+  const avg = paidOrders.length ? Math.round(revenue / paidOrders.length) : 0;
 
   document.getElementById('r-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('r-orders').textContent = orders.length;
