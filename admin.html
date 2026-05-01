@@ -357,22 +357,37 @@ window.loadTables = function() {
   }
 };
 
-function buildMenuMgmt() {
+async function buildMenuMgmt() {
+  // Load menu item states from Firebase
+  let menuStates = {};
+  try {
+    const snap = await getDocs(collection(db, 'menuItems'));
+    snap.forEach(doc => {
+      menuStates[doc.id] = doc.data().enabled !== false;
+    });
+  } catch(e) {
+    console.log('Menu states loaded (or not found)');
+  }
+  
   const el = document.getElementById('menu-list');
   el.innerHTML = MENU.map(section => `
     <div class="menu-section">
       <div class="menu-section-header">${section.cat}</div>
       ${section.items.map(item => `
         <div class="menu-item-row">
-          <div class="mi-emoji">${item.emoji}</div>
-          <div class="mi-info"><div class="mi-name">${item.name}</div><div class="mi-price">₹${item.price}</div></div>
-          <label class="mi-toggle"><input type="checkbox" checked onchange="toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
+          <div class="mi-info"><div class="mi-name">${item.name}</div><div class="mi-price">₹${item.price || (item.variants ? item.variants[0].p : 'N/A')}</div></div>
+          <label class="mi-toggle"><input type="checkbox" ${menuStates[item.id] !== false ? 'checked' : ''} onchange="toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
         </div>`).join('')}
     </div>`).join('');
 }
 
-window.toggleItem = function(id, enabled) {
-  console.log('Item', id, enabled ? 'enabled' : 'disabled');
+window.toggleItem = async function(id, enabled) {
+  try {
+    await updateDoc(doc(db, 'menuItems', String(id)), { id, enabled });
+    console.log('Item', id, enabled ? 'enabled' : 'disabled');
+  } catch(e) {
+    console.error('Toggle error:', e);
+  }
 };
 
 function renderCard(o, editable) {
