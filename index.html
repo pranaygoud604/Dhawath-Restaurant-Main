@@ -14,20 +14,20 @@
   --cream:#FAF6EF;--white:#FFFFFF;--border:#E8DEC8;--danger:#A32D2D;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
-#table-screen{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
-.ts-card{background:var(--white);border-radius:20px;padding:36px 32px;max-width:420px;width:100%;border:2px solid var(--gold);text-align:center}
+#table-screen{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;align-items:flex-start;justify-content:center;padding:10px;overflow-y:auto;padding-top:20px;padding-bottom:20px}
+.ts-card{background:var(--white);border-radius:20px;padding:24px 20px;max-width:420px;width:100%;border:2px solid var(--gold);text-align:center;max-height:calc(100vh - 40px);overflow-y:auto}
 .ts-mark{width:64px;height:64px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-family:'Playfair Display',serif;color:var(--dark);font-weight:700;margin:0 auto 14px}
 .ts-card h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--dark);margin-bottom:4px}
-.ts-card p{font-size:13px;color:var(--muted);margin-bottom:24px}
-.table-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.tbl-btn{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:14px 8px;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.18s}
+.ts-card p{font-size:13px;color:var(--muted);margin-bottom:20px}
+.table-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.tbl-btn{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:12px 6px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.18s}
 .tbl-btn:hover,.tbl-btn.selected{background:var(--gold);color:var(--dark);border-color:var(--gold)}
-.ts-custom{display:flex;gap:8px;margin-bottom:20px}
+.ts-custom{display:flex;gap:8px;margin-bottom:16px}
 .ts-custom input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)}
 .ts-custom input:focus{border-color:var(--gold)}
-.ts-go{width:100%;background:var(--gold);color:var(--dark);border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.ts-go{width:100%;background:var(--gold);color:var(--dark);border:none;padding:12px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .ts-go:hover{background:var(--gold-light)}
-.fb-connecting{font-size:12px;color:var(--muted);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+.fb-connecting{font-size:12px;color:var(--muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px}
 .mini-spin{width:12px;height:12px;border:2px solid rgba(200,146,42,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 .header{background:var(--dark);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--gold)}
 .logo{display:flex;align-items:center;gap:10px}
@@ -46,7 +46,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .app-body{height:calc(100vh - 94px);overflow:hidden}
 #menu-view{display:grid;grid-template-columns:1fr 300px;height:100%}
-@media(max-width:700px){#menu-view{grid-template-columns:1fr}.order-side{display:none}}
+@media(max-width:700px){#menu-view{grid-template-columns:1fr}.order-side{display:none}
+.ts-card{padding:16px 14px}
+.ts-card h1{font-size:22px;margin-bottom:3px}
+.ts-card p{font-size:12px;margin-bottom:14px}
+.table-grid{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.tbl-btn{padding:10px 4px;font-size:13px}
+}
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
 .category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
 .cat-btn{background:none;border:1.5px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.18s}
