@@ -29,7 +29,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* STATS */
-.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border)}
+.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border)}
+@media(max-width:900px){.stats-bar{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
 .stat-card{background:var(--cream);border-radius:10px;padding:12px 14px}
 .stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
@@ -139,7 +140,8 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="stat-orders">—</div></div>
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
-  <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="stat-pending">—</div></div>
+  <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
+  <div class="stat-card"><div class="stat-label">Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
   <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
@@ -243,13 +245,17 @@ function startLive() {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
+    // Also update pending orders view if it's currently active
+    if (document.getElementById('view-pending-orders').classList.contains('active')) {
+      loadPendingOrders();
+    }
   });
 }
 
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
   const filtered = kitchenFilter === 'all'
-    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled')
+    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment')
     : allOrders.filter(o => o.status === kitchenFilter);
   if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
@@ -258,12 +264,15 @@ function renderKitchen() {
 function updateStats() {
   const today = new Date().toDateString();
   const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
-  const revenue = todayOrders.reduce((a, o) => a + (o.total || 0), 0);
+  const revenue = todayOrders.filter(o => o.status === 'paid' || o.status === 'served').reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
-  const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
+  const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
+  const activeOrders = allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment');
+  const tables = [...new Set(activeOrders.map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-pending-payment').textContent = pendingPayment;
   document.getElementById('stat-tables').textContent = tables;
 }
 
@@ -293,9 +302,9 @@ window.loadPendingOrders = function() {
 window.loadTables = function() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
-  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => String(o.tableNumber)))];
+  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid').map(o => String(o.tableNumber)))];
   const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => String(o.tableNumber)))];
-  const pendingPaymentTables = [...new Set(allOrders.filter(o => o.status === 'pending-payment').map(o => String(o.tableNumber)))];
+  const pendingPaymentTables = [...new Set(allOrders.filter(o => o.status === 'pending-payment').map(o => String(o.tableNumber))));
   
   // Indoor Tables (1-12)
   const indoorSection = document.createElement('div');
