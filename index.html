@@ -55,6 +55,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .items-grid{padding:10px 14px;display:grid;gap:8px}
 .item-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px;transition:border-color 0.18s}
 .item-card:hover{border-color:var(--gold)}
+.item-card.item-unavailable{opacity:0.6;background:rgba(255,255,255,0.7)}
+.item-card.item-unavailable:hover{border-color:var(--border)}
+.unavailable-label{font-size:11px;color:var(--danger);font-weight:600;padding:6px 10px;background:rgba(163,45,45,0.1);border-radius:6px;display:flex;align-items:center;gap:4px}
 .item-info{flex:1;min-width:0}
 .item-name{font-weight:500;font-size:13px;color:var(--dark);margin-bottom:2px}
 .item-desc{font-size:11px;color:var(--muted);line-height:1.3;margin-bottom:5px}
@@ -259,7 +262,7 @@ const MENU = [
     { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
   ]},
   { cat:'Rice & Noodles 🍜', items:[
-    { id:6,  name:'chicken',                    badges:['nv'],        price:90 },
+    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
     { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
     { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
     { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
@@ -298,6 +301,27 @@ const MENU = [
   ]},
   { cat:'Breads 🫓', items:[
     { id:34, name:'Chapathi',          desc:'Soft whole wheat flatbread — per piece',     badges:['veg'],        price:10 },
+  ]},
+  { cat:'Beverages 🥤', items:[
+    { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
+    { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
+    { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
+    { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
+    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
+    { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
+  ]},
+  { cat:'Smokes 🚬', items:[
+    { id:44, name:'Kings',             desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:45, name:'Lights',            desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:46, name:'Gold Flak',         desc:'Small cigarettes',                           badges:['nv'],        price:15 },
+    { id:47, name:'Connects',          desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:48, name:'Bistal',            desc:'Cigarettes',                                 badges:['nv'],        price:15 },
+    { id:49, name:'American Club',     desc:'Cigarettes',                                 badges:['nv'],        price:20 },
+    { id:50, name:'Silk',              desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:51, name:'Advance',           desc:'Small cigarettes',                           badges:['nv'],        price:16 },
   ]},
 ];
 
@@ -339,14 +363,17 @@ function buildMenu() {
   const nav = document.getElementById('cat-nav'); const mc = document.getElementById('menu-content');
   nav.innerHTML = ''; mc.innerHTML = '';
   MENU.forEach((sec, i) => {
-    const enabledItems = sec.items.filter(item => menuItemStates[item.id] !== false);
-    if (!enabledItems.length) return; // Skip empty categories
+    const hasAnyEnabled = sec.items.some(item => menuItemStates[item.id] !== false);
+    if (!hasAnyEnabled) return; // Skip categories with all items disabled
     const btn = document.createElement('button');
     btn.className = 'cat-btn' + (i === 0 ? ' active' : ''); btn.textContent = sec.cat;
     btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' }); };
     nav.appendChild(btn);
     const div = document.createElement('div'); div.id = 's' + sec.cat.replace(/\W/g, '');
-    div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${enabledItems.map(renderItem).join('')}</div>`;
+    div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${sec.items.map(item => {
+      const isEnabled = menuItemStates[item.id] !== false;
+      return isEnabled ? renderItem(item) : renderDisabledItem(item);
+    }).join('')}</div>`;
     mc.appendChild(div);
   });
 }
@@ -377,6 +404,11 @@ function renderItem(item) {
       : `<button class="add-btn" onclick="window._add(${item.id})">+</button>`;
     return `<div class="item-card"><div class="item-info"><div class="badges">${bhtml}</div><div class="item-name">${item.name}</div><div class="item-desc">${item.desc}</div><div class="single-price">₹${item.price}</div></div><div class="ctrl-wrap">${ctrl}</div></div>`;
   }
+}
+
+function renderDisabledItem(item) {
+  const bhtml = bh(item.badges);
+  return `<div class="item-card item-unavailable"><div class="item-info"><div class="badges">${bhtml}</div><div class="item-name">${item.name}</div><div class="item-desc">${item.desc}</div></div><div class="ctrl-wrap"><span class="unavailable-label">⛔ Item Not Available</span></div></div>`;
 }
 
 window._sv  = (id, l, p) => { selV[id] = { l, p }; buildMenu(); };
