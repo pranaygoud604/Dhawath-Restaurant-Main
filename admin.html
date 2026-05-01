@@ -29,8 +29,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* STATS */
-.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border)}
-@media(max-width:900px){.stats-bar{grid-template-columns:repeat(3,1fr)}}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border)}
 @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
 .stat-card{background:var(--cream);border-radius:10px;padding:12px 14px}
 .stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
@@ -51,8 +50,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 /* ORDER CARDS */
 .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .order-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
-.order-card.urgent{border-left:3px solid var(--danger);background:#FFF5F5}
-.order-card.pending-payment{border-left:4px solid var(--danger);background:#FFF5F5}
+.order-card.urgent{border-left:3px solid var(--danger)}
 .oc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .oc-num{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold)}
 .oc-table{font-size:12px;color:var(--muted);background:var(--cream);padding:3px 9px;border-radius:10px}
@@ -60,10 +58,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .s-pending{background:#FBF3E3;color:#854F0B}
 .s-preparing{background:#E6F1FB;color:#185FA5}
 .s-ready{background:#EAF3DE;color:#3B6D11}
-.s-served{background:#E8DEC8;color:#5F5E5A}
-.s-pending-payment{background:#FFE6E6;color:var(--danger);font-weight:600}
-.s-paid{background:#D4EDDA;color:#155724;font-weight:600}
-.s-cancelled{background:#F8D7DA;color:#721C24}
+.s-served{background:#F1EFE8;color:#5F5E5A}
 .s-cancelled{background:#FCEBEB;color:#A32D2D}
 .oc-items{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.7}
 .oc-item-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)}
@@ -102,13 +97,11 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 .table-card{background:var(--white);border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.18s}
 .table-card.occupied{border-color:var(--gold);background:var(--gold-pale)}
 .table-card.ready{border-color:var(--success);background:#EAF3DE}
-.table-card.pending{border-color:var(--danger);background:#FFE6E6;border-width:3px}
 .table-card.available{border-color:var(--border)}
 .table-num{font-family:'Playfair Display',serif;font-size:28px;color:var(--dark);margin-bottom:4px}
 .table-status{font-size:11px;font-weight:500;color:var(--muted)}
 .table-card.occupied .table-status{color:var(--gold)}
 .table-card.ready .table-status{color:var(--success)}
-.table-card.pending .table-status{color:var(--danger);font-weight:700}
 
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(200,146,42,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -130,7 +123,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="tabs">
   <div class="tab active" onclick="showView('kitchen',this)">🍳 Kitchen</div>
   <div class="tab" onclick="showView('all-orders',this)">📋 All Orders</div>
-  <div class="tab" onclick="showView('pending-orders',this)">💳 Pending Payments</div>
   <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
   <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
@@ -140,8 +132,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="stat-orders">—</div></div>
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
-  <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
-  <div class="stat-card"><div class="stat-label">Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
+  <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" id="stat-pending">—</div></div>
   <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
@@ -170,15 +161,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div id="all-orders-list"><div class="no-orders"><p>Loading...</p></div></div>
 </div>
 
-<!-- PENDING PAYMENTS -->
-<div class="view" id="view-pending-orders">
-  <div class="view-header">
-    <h2>⏳ Pending Payments</h2>
-    <button class="refresh-btn" onclick="loadPendingOrders()">↻ Refresh</button>
-  </div>
-  <div id="pending-orders-list"><div class="no-orders"><p>No pending payments</p></div></div>
-</div>
-
 <!-- TABLES -->
 <div class="view" id="view-tables">
   <div class="view-header"><h2>Table Status</h2><button class="refresh-btn" onclick="loadTables()">↻ Refresh</button></div>
@@ -194,7 +176,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -210,24 +192,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const MENU = [
-  {cat:'Biryani 🍚',items:[
-    {id:1,name:'Biryani',price:220,emoji:'🍚'},{id:2,name:'Fry Piece Biryani',price:240,emoji:'🍚'},
-    {id:3,name:'Paneer Biryani',price:240,emoji:'🍚'},{id:4,name:'Gongura C Biryani',price:240,emoji:'🍚'},{id:5,name:'Egg Biryani',price:80,emoji:'🥚'}]},
-  {cat:'Rice & Noodles 🍜',items:[
-    {id:6,name:'Chicken Rice',price:90,emoji:'🍚'},{id:7,name:'Egg Rice',price:70,emoji:'🍚'},
-    {id:8,name:'Veg Rice',price:60,emoji:'🍚'},{id:9,name:'Geera Rice',price:80,emoji:'🍚'},{id:10,name:'Egg Noodles',price:70,emoji:'🍜'},{id:11,name:'Chicken Noodles',price:90,emoji:'🍜'},{id:12,name:'Veg Noodles',price:60,emoji:'🍜'}]},
-  {cat:'Starters 🔥',items:[
-    {id:13,name:'Chicken Manchuria',price:150,emoji:'🔥'},{id:14,name:'Veg Manchuria',price:80,emoji:'🔥'},
-    {id:15,name:'Egg Burji',price:100,emoji:'🥚'},{id:16,name:'Egg 65',price:110,emoji:'🥚'},{id:17,name:'Egg Chilli',price:110,emoji:'🥚'},{id:18,name:'Egg Manchurian',price:100,emoji:'🥚'},{id:19,name:'Egg Keema',price:100,emoji:'🥚'},{id:20,name:'Corn Fry',price:120,emoji:'🌽'}]},
-  {cat:'Chicken Specials 🍗',items:[
-    {id:21,name:'Chicken Wings',price:100,emoji:'🍗'},{id:22,name:'Chicken Lollipops',price:150,emoji:'🍗'},
-    {id:23,name:'Chicken Pakodi',price:150,emoji:'🍗'},{id:24,name:'Chicken Roast',price:160,emoji:'🍗'},{id:25,name:'Chicken 65',price:160,emoji:'🍗'},{id:26,name:'Chicken Chilli',price:160,emoji:'🍗'},{id:27,name:'C. Telangana Curry',price:160,emoji:'🍗'},{id:28,name:'Chicken Curry',price:150,emoji:'🍗'}]},
-  {cat:'Paneer 🧀',items:[
-    {id:29,name:'Paneer Masala',price:180,emoji:'🧀'},{id:30,name:'Paneer Curry',price:160,emoji:'🧀'}]},
-  {cat:'Sea & Meat 🐟',items:[
-    {id:31,name:'Fish Fry',price:120,emoji:'🐟'},{id:32,name:'Boti',price:150,emoji:'🥩'},{id:33,name:'Head Curry',price:180,emoji:'🍲'}]},
-  {cat:'Breads 🫓',items:[
-    {id:34,name:'Chapathi',price:10,emoji:'🫓'}]}
+  {cat:'Starters',items:[
+    {id:1,name:'Mutton Seekh Kebab',price:320,emoji:'🥩'},{id:2,name:'Chicken Shami Kebab',price:260,emoji:'🍗'},
+    {id:3,name:'Veg Crispy Corn',price:180,emoji:'🌽'},{id:4,name:'Paneer Tikka',price:240,emoji:'🧀'},{id:5,name:'Fish Amritsari',price:340,emoji:'🐟'}]},
+  {cat:'Biryani',items:[
+    {id:6,name:'Hyderabadi Dum Biryani',price:380,emoji:'🍚'},{id:7,name:'Chicken Biryani',price:320,emoji:'🍛'},
+    {id:8,name:'Veg Biryani',price:240,emoji:'🌿'},{id:9,name:'Prawn Biryani',price:420,emoji:'🦐'}]},
+  {cat:'Curries',items:[
+    {id:10,name:'Butter Chicken',price:300,emoji:'🍲'},{id:11,name:'Rogan Josh',price:360,emoji:'🥘'},
+    {id:12,name:'Dal Makhani',price:220,emoji:'🫘'},{id:13,name:'Palak Paneer',price:240,emoji:'🍃'},{id:14,name:'Prawn Masala',price:380,emoji:'🦐'}]},
+  {cat:'Breads',items:[
+    {id:15,name:'Butter Naan',price:60,emoji:'🫓'},{id:16,name:'Garlic Roti',price:55,emoji:'🫓'},
+    {id:17,name:'Paratha',price:70,emoji:'🫓'},{id:18,name:'Laccha Paratha',price:80,emoji:'🫓'}]},
+  {cat:'Beverages',items:[
+    {id:19,name:'Mango Lassi',price:120,emoji:'🥭'},{id:20,name:'Masala Chai',price:60,emoji:'☕'},
+    {id:21,name:'Fresh Lime Soda',price:80,emoji:'🍋'},{id:22,name:'Rose Sharbat',price:100,emoji:'🌹'}]},
+  {cat:'Desserts',items:[
+    {id:23,name:'Gulab Jamun',price:120,emoji:'🍮'},{id:24,name:'Phirni',price:140,emoji:'🥣'},{id:25,name:'Double Ka Meetha',price:160,emoji:'🍞'}]}
 ];
 
 let allOrders = [], kitchenFilter = 'all';
@@ -245,10 +226,6 @@ function startLive() {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
-    // Also update pending orders view if it's currently active
-    if (document.getElementById('view-pending-orders').classList.contains('active')) {
-      loadPendingOrders();
-    }
   });
 }
 
@@ -264,15 +241,12 @@ function renderKitchen() {
 function updateStats() {
   const today = new Date().toDateString();
   const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
-  const revenue = todayOrders.filter(o => o.status === 'paid' || o.status === 'served').reduce((a, o) => a + (o.total || 0), 0);
+  const revenue = todayOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
-  const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
-  const activeOrders = allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment');
-  const tables = [...new Set(activeOrders.map(o => o.tableNumber))].length;
+  const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
-  document.getElementById('stat-pending-payment').textContent = pendingPayment;
   document.getElementById('stat-tables').textContent = tables;
 }
 
@@ -285,78 +259,20 @@ window.loadAllOrders = async function() {
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
 };
 
-window.loadPendingOrders = function() {
-  const el = document.getElementById('pending-orders-list');
-  const pendingOrders = allOrders.filter(o => o.status === 'pending-payment');
-  if (!pendingOrders.length) { 
-    el.innerHTML = '<div class="no-orders"><div class="ni">✓</div><p>No pending payments</p></div>'; 
-    return; 
-  }
-  el.innerHTML = '<div class="orders-grid">' + pendingOrders.sort((a, b) => {
-    const timeA = a.orderedAt ? new Date(a.orderedAt).getTime() : 0;
-    const timeB = b.orderedAt ? new Date(b.orderedAt).getTime() : 0;
-    return timeB - timeA;
-  }).map(o => renderCard(o, true)).join('') + '</div>';
-};
-
 window.loadTables = function() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
-  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid').map(o => String(o.tableNumber)))];
-  const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => String(o.tableNumber)))];
-  const pendingPaymentTables = [...new Set(allOrders.filter(o => o.status === 'pending-payment').map(o => String(o.tableNumber))));
-  
-  // Indoor Tables (1-12)
-  const indoorSection = document.createElement('div');
-  indoorSection.innerHTML = '<h3 style="grid-column:1/-1;font-size:14px;color:var(--muted);margin-top:10px">🏠 Indoor Tables</h3>';
-  grid.appendChild(indoorSection);
-  
-  for (let i = 1; i <= 12; i++) {
+  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
+  const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
+  for (let i = 1; i <= 16; i++) {
     const t = String(i);
     const isReady = readyTables.includes(t);
-    const isPending = pendingPaymentTables.includes(t);
     const isOccupied = occupiedTables.includes(t);
-    const cls = isPending ? 'pending' : isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
-    const statusText = isPending ? '💳 Pending' : isReady ? '🔔 Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
+    const cls = isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
+    const statusText = isReady ? '🔔 Food Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
     const div = document.createElement('div');
     div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">I${i}</div><div class="table-status">${statusText}</div>`;
-    grid.appendChild(div);
-  }
-  
-  // Outdoor Tables (13-22)
-  const outdoorSection = document.createElement('div');
-  outdoorSection.innerHTML = '<h3 style="grid-column:1/-1;font-size:14px;color:var(--muted);margin-top:10px">🌳 Outdoor Tables</h3>';
-  grid.appendChild(outdoorSection);
-  
-  for (let i = 1; i <= 10; i++) {
-    const t = String(i + 100); // Use 101-110 for outdoor
-    const isReady = readyTables.includes(t);
-    const isPending = pendingPaymentTables.includes(t);
-    const isOccupied = occupiedTables.includes(t);
-    const cls = isPending ? 'pending' : isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
-    const statusText = isPending ? '💳 Pending' : isReady ? '🔔 Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
-    const div = document.createElement('div');
-    div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">O${i}</div><div class="table-status">${statusText}</div>`;
-    grid.appendChild(div);
-  }
-  
-  // Parcels
-  const parcelSection = document.createElement('div');
-  parcelSection.innerHTML = '<h3 style="grid-column:1/-1;font-size:14px;color:var(--muted);margin-top:10px">📦 Parcels</h3>';
-  grid.appendChild(parcelSection);
-  
-  const parcelCount = allOrders.filter(o => (o.tableNumber === 'Parcel' || String(o.tableNumber).startsWith('P'))).length;
-  for (let i = 1; i <= Math.max(3, parcelCount + 1); i++) {
-    const t = 'P' + i;
-    const parcelOrders = allOrders.filter(o => o.tableNumber === t && o.status !== 'served');
-    const status = parcelOrders.length > 0 ? (parcelOrders[0].status === 'ready' ? 'ready' : 'occupied') : 'available';
-    const cls = status;
-    const statusText = status === 'ready' ? '🔔 Ready' : status === 'occupied' ? '📦 Waiting' : '✓ Available';
-    const div = document.createElement('div');
-    div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">${t}</div><div class="table-status">${statusText}</div>`;
+    div.innerHTML = `<div class="table-num">${i}</div><div class="table-status">${statusText}</div>`;
     grid.appendChild(div);
   }
 };
@@ -375,22 +291,15 @@ function buildMenuMgmt() {
     </div>`).join('');
 }
 
-window.toggleItem = async function(id, enabled) {
-  try {
-    await setDoc(doc(db, 'menuItems', String(id)), { id, enabled }, { merge: true });
-    console.log('Item', id, enabled ? 'enabled' : 'disabled');
-  } catch(e) {
-    console.error('Error updating item:', e);
-    alert('Failed to update item');
-  }
+window.toggleItem = function(id, enabled) {
+  console.log('Item', id, enabled ? 'enabled' : 'disabled');
 };
 
 function renderCard(o, editable) {
-  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', 'pending-payment': 's-pending-payment', paid: 's-paid', cancelled: 's-cancelled' };
-  const statuses = ['pending', 'preparing', 'ready', 'served', 'pending-payment', 'paid'];
+  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', cancelled: 's-cancelled' };
+  const statuses = ['pending', 'preparing', 'ready', 'served'];
   const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—';
   const isUrgent = o.status === 'pending' && o.orderedAt && (Date.now() - new Date(o.orderedAt).getTime()) > 10 * 60 * 1000;
-  const isPendingPayment = o.status === 'pending-payment';
   const itemRows = o.items ? o.items.map(i => `<div class="oc-item-row"><span>${i.emoji||''} ${i.name} ×${i.qty}</span><span>₹${i.lineTotal||i.price*i.qty}</span></div>`).join('') : '';
   const special = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
   const statusBtns = editable ? `
@@ -398,7 +307,7 @@ function renderCard(o, editable) {
       ${statuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="setStatus('${o._id}','${s}')">${s}</button>`).join('')}
       <button class="s-btn cancel${o.status==='cancelled'?' active':''}" onclick="setStatus('${o._id}','cancelled')">cancel</button>
     </div>` : '';
-  return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
+  return `<div class="order-card${isUrgent?' urgent':''}">
     <div class="oc-top">
       <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
       <span class="oc-table">Table ${o.tableNumber}</span>
@@ -406,7 +315,7 @@ function renderCard(o, editable) {
     </div>
     ${itemRows}
     ${special}
-    <div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}${isUrgent?' ⚠️ Urgent':''}${isPendingPayment?' 💳 Payment Pending':''}</span></div>
+    <div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}${isUrgent?' ⚠️ Urgent':''}</span></div>
     ${statusBtns}
   </div>`;
 }
@@ -429,7 +338,6 @@ window.showView = function(view, el) {
   document.getElementById('view-' + view).classList.add('active');
   el.classList.add('active');
   if (view === 'all-orders') loadAllOrders();
-  if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
 };
 
