@@ -192,23 +192,24 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const MENU = [
-  {cat:'Starters',items:[
-    {id:1,name:'Mutton Seekh Kebab',price:320,emoji:'🥩'},{id:2,name:'Chicken Shami Kebab',price:260,emoji:'🍗'},
-    {id:3,name:'Veg Crispy Corn',price:180,emoji:'🌽'},{id:4,name:'Paneer Tikka',price:240,emoji:'🧀'},{id:5,name:'Fish Amritsari',price:340,emoji:'🐟'}]},
-  {cat:'Biryani',items:[
-    {id:6,name:'Hyderabadi Dum Biryani',price:380,emoji:'🍚'},{id:7,name:'Chicken Biryani',price:320,emoji:'🍛'},
-    {id:8,name:'Veg Biryani',price:240,emoji:'🌿'},{id:9,name:'Prawn Biryani',price:420,emoji:'🦐'}]},
-  {cat:'Curries',items:[
-    {id:10,name:'Butter Chicken',price:300,emoji:'🍲'},{id:11,name:'Rogan Josh',price:360,emoji:'🥘'},
-    {id:12,name:'Dal Makhani',price:220,emoji:'🫘'},{id:13,name:'Palak Paneer',price:240,emoji:'🍃'},{id:14,name:'Prawn Masala',price:380,emoji:'🦐'}]},
-  {cat:'Breads',items:[
-    {id:15,name:'Butter Naan',price:60,emoji:'🫓'},{id:16,name:'Garlic Roti',price:55,emoji:'🫓'},
-    {id:17,name:'Paratha',price:70,emoji:'🫓'},{id:18,name:'Laccha Paratha',price:80,emoji:'🫓'}]},
-  {cat:'Beverages',items:[
-    {id:19,name:'Mango Lassi',price:120,emoji:'🥭'},{id:20,name:'Masala Chai',price:60,emoji:'☕'},
-    {id:21,name:'Fresh Lime Soda',price:80,emoji:'🍋'},{id:22,name:'Rose Sharbat',price:100,emoji:'🌹'}]},
-  {cat:'Desserts',items:[
-    {id:23,name:'Gulab Jamun',price:120,emoji:'🍮'},{id:24,name:'Phirni',price:140,emoji:'🥣'},{id:25,name:'Double Ka Meetha',price:160,emoji:'🍞'}]}
+  {cat:'Biryani 🍚',items:[
+    {id:1,name:'Biryani',price:220,emoji:'🍚'},{id:2,name:'Fry Piece Biryani',price:240,emoji:'🍚'},
+    {id:3,name:'Paneer Biryani',price:240,emoji:'🍚'},{id:4,name:'Gongura C Biryani',price:240,emoji:'🍚'},{id:5,name:'Egg Biryani',price:80,emoji:'🥚'}]},
+  {cat:'Rice & Noodles 🍜',items:[
+    {id:6,name:'Chicken Rice',price:90,emoji:'🍚'},{id:7,name:'Egg Rice',price:70,emoji:'🍚'},
+    {id:8,name:'Veg Rice',price:60,emoji:'🍚'},{id:9,name:'Geera Rice',price:80,emoji:'🍚'},{id:10,name:'Egg Noodles',price:70,emoji:'🍜'},{id:11,name:'Chicken Noodles',price:90,emoji:'🍜'},{id:12,name:'Veg Noodles',price:60,emoji:'🍜'}]},
+  {cat:'Starters 🔥',items:[
+    {id:13,name:'Chicken Manchuria',price:150,emoji:'🔥'},{id:14,name:'Veg Manchuria',price:80,emoji:'🔥'},
+    {id:15,name:'Egg Burji',price:100,emoji:'🥚'},{id:16,name:'Egg 65',price:110,emoji:'🥚'},{id:17,name:'Egg Chilli',price:110,emoji:'🥚'},{id:18,name:'Egg Manchurian',price:100,emoji:'🥚'},{id:19,name:'Egg Keema',price:100,emoji:'🥚'},{id:20,name:'Corn Fry',price:120,emoji:'🌽'}]},
+  {cat:'Chicken Specials 🍗',items:[
+    {id:21,name:'Chicken Wings',price:100,emoji:'🍗'},{id:22,name:'Chicken Lollipops',price:150,emoji:'🍗'},
+    {id:23,name:'Chicken Pakodi',price:150,emoji:'🍗'},{id:24,name:'Chicken Roast',price:160,emoji:'🍗'},{id:25,name:'Chicken 65',price:160,emoji:'🍗'},{id:26,name:'Chicken Chilli',price:160,emoji:'🍗'},{id:27,name:'C. Telangana Curry',price:160,emoji:'🍗'},{id:28,name:'Chicken Curry',price:150,emoji:'🍗'}]},
+  {cat:'Paneer 🧀',items:[
+    {id:29,name:'Paneer Masala',price:180,emoji:'🧀'},{id:30,name:'Paneer Curry',price:160,emoji:'🧀'}]},
+  {cat:'Sea & Meat 🐟',items:[
+    {id:31,name:'Fish Fry',price:120,emoji:'🐟'},{id:32,name:'Boti',price:150,emoji:'🥩'},{id:33,name:'Head Curry',price:180,emoji:'🍲'}]},
+  {cat:'Breads 🫓',items:[
+    {id:34,name:'Chapathi',price:10,emoji:'🫓'}]}
 ];
 
 let allOrders = [], kitchenFilter = 'all';
