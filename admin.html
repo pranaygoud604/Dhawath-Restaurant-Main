@@ -138,7 +138,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
   <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
   <div class="stat-card"><div class="stat-label">💳 Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
-  <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
 <!-- KITCHEN VIEW -->
@@ -151,6 +150,8 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
         <button class="filter-btn" onclick="filterKitchen('pending',this)">Pending</button>
         <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
         <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
+        <button class="filter-btn" onclick="filterKitchen('served',this)">Served</button>
+        <button class="filter-btn" onclick="filterKitchen('pending-payment',this)">💳 Unpaid</button>
       </div>
     </div>
   </div>
@@ -294,7 +295,7 @@ onAuthStateChanged(auth, user => {
 
 // Live kitchen listener
 function startLive() {
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
   onSnapshot(q, snap => {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
@@ -309,7 +310,7 @@ function startLive() {
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
   const filtered = kitchenFilter === 'all'
-    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment')
+    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid')
     : allOrders.filter(o => o.status === kitchenFilter);
   if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
@@ -322,12 +323,10 @@ function updateStats() {
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
   const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
-  const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
   document.getElementById('stat-pending-payment').textContent = pendingPayment;
-  document.getElementById('stat-tables').textContent = tables;
 }
 
 window.loadAllOrders = async function() {
@@ -429,7 +428,7 @@ window.setStatus = async function(id, status) {
   try { 
     // Auto-transition: when order is marked "served", automatically set to "pending-payment"
     const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
   }
   catch(e) { alert('Error: ' + e.message); }
 };
