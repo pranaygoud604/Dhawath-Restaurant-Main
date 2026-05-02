@@ -9,8 +9,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--gold:#C8922A;--gold-light:#E8B84B;--gold-pale:#FBF3E3;--dark:#1A1208;--ink:#2C1F0A;--muted:#7A6A4F;--cream:#FAF6EF;--white:#FFFFFF;--border:#E8DEC8;--danger:#A32D2D;--success:#2D7A4F}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
-
-/* HEADER */
 .header{background:var(--dark);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-mark{width:36px;height:36px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-family:'Playfair Display',serif;color:var(--dark);font-weight:700}
@@ -22,21 +20,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .logout-btn{background:none;border:1px solid rgba(200,146,42,0.4);color:var(--gold-light);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
 .logout-btn:hover{background:rgba(200,146,42,0.1)}
-
-/* TABS */
 .tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:90;overflow-x:auto}
 .tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-
-/* STATS */
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border)}
 @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}}
 .stat-card{background:var(--cream);border-radius:10px;padding:12px 14px}
 .stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
 .stat-value{font-size:22px;font-weight:600;font-family:'Playfair Display',serif;color:var(--dark)}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
-
-/* VIEWS */
 .view{display:none;padding:16px 20px;min-height:calc(100vh - 200px)}
 .view.active{display:block}
 .view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
@@ -46,8 +37,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .filter-btn.active,.filter-btn:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 .refresh-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold)}
-
-/* ORDER CARDS */
 .orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .order-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
 .order-card.urgent{border-left:3px solid var(--danger)}
@@ -64,8 +53,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .s-cancelled{background:#FCEBEB;color:#A32D2D}
 .order-card.pending-payment{border-left:4px solid var(--danger);background:#FFF5F5}
 .oc-items{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.7}
-.oc-item-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)}
-.oc-item-row:last-child{border:none}
+.oc-item-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
 .oc-special{font-size:11px;color:#185FA5;background:#E6F1FB;padding:5px 9px;border-radius:6px;margin:8px 0}
 .oc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .oc-total{font-size:14px;font-weight:600;color:var(--dark)}
@@ -78,13 +66,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .s-btn.cancel:hover,.s-btn.cancel.active{background:var(--danger);color:#fff}
 .no-orders{text-align:center;padding:48px;color:var(--muted)}
 .no-orders .ni{font-size:40px;margin-bottom:12px}
-
-/* MENU MANAGEMENT */
 .menu-section{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
-.menu-section-header{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+.menu-section-header{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:16px}
 .menu-item-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
 .menu-item-row:last-child{border:none}
-.mi-emoji{font-size:22px;width:36px;text-align:center}
 .mi-info{flex:1}
 .mi-name{font-size:13px;font-weight:500}
 .mi-price{font-size:12px;color:var(--gold);font-weight:600}
@@ -94,45 +79,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s}
 input:checked+.toggle-slider{background:var(--gold)}
 input:checked+.toggle-slider:before{transform:translateX(18px)}
-
-/* TABLE STATUS */
 .tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
 .table-card{background:var(--white);border:2px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.18s}
+.table-card.available{border-color:#2D7A4F}
 .table-card.occupied{border-color:var(--gold);background:var(--gold-pale)}
-.table-card.ready{border-color:var(--success);background:#EAF3DE}
-.table-card.available{border-color:var(--border)}
-.table-num{font-family:'Playfair Display',serif;font-size:28px;color:var(--dark);margin-bottom:4px}
-.table-status{font-size:11px;font-weight:500;color:var(--muted)}
-.table-card.occupied .table-status{color:var(--gold)}
-.table-card.ready .table-status{color:var(--success)}
-
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(200,146,42,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.table-card.ready{border-color:#2D7A4F;background:#D4EDDA}
+.table-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:4px}
+.table-status{font-size:10px;color:var(--muted)}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="logo">
-    <div class="logo-mark">م</div>
-    <div class="logo-text"><h1>My Dhawath</h1><p>Admin Dashboard</p></div>
+    <div class="logo-mark">🥘</div>
+    <div class="logo-text">
+      <h1>My Dhawath</h1>
+      <p>ADMIN DASHBOARD</p>
+    </div>
   </div>
   <div class="header-right">
-    <div class="live-badge"><div class="live-dot"></div><span>Live</span></div>
-    <button class="logout-btn" onclick="logout()">Sign Out</button>
+    <div class="live-badge"><span class="live-dot"></span> Live</div>
+    <button class="logout-btn" onclick="window.logOut()">Sign Out</button>
   </div>
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showView('kitchen',this)">🍳 Kitchen</div>
-  <div class="tab" onclick="showView('all-orders',this)">📋 All Orders</div>
-  <div class="tab" onclick="showView('pending-orders',this)">💳 Pending Payments</div>
-  <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
-  <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
+  <div class="tab active" onclick="window.showView('kitchen',this)">🍳 Kitchen</div>
+  <div class="tab" onclick="window.showView('all-orders',this)">📋 All Orders</div>
+  <div class="tab" onclick="window.showView('pending-orders',this)">💳 Pending Payments</div>
+  <div class="tab" onclick="window.showView('tables',this)">🪑 Tables</div>
+  <div class="tab" onclick="window.showView('menu',this)">📖 Menu</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
 </div>
 
-<!-- STATS -->
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="stat-orders">—</div></div>
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
@@ -146,12 +126,12 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
     <h2>Kitchen Orders</h2>
     <div style="display:flex;gap:8px;align-items:center">
       <div class="filter-row" id="kitchen-filters">
-        <button class="filter-btn active" onclick="filterKitchen('all',this)">All</button>
-        <button class="filter-btn" onclick="filterKitchen('pending',this)">Pending</button>
-        <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
-        <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
-        <button class="filter-btn" onclick="filterKitchen('served',this)">Served</button>
-        <button class="filter-btn" onclick="filterKitchen('pending-payment',this)">💳 Unpaid</button>
+        <button class="filter-btn active" onclick="window.filterKitchen('all',this)">All</button>
+        <button class="filter-btn" onclick="window.filterKitchen('pending',this)">Pending</button>
+        <button class="filter-btn" onclick="window.filterKitchen('preparing',this)">Preparing</button>
+        <button class="filter-btn" onclick="window.filterKitchen('ready',this)">Ready</button>
+        <button class="filter-btn" onclick="window.filterKitchen('served',this)">Served</button>
+        <button class="filter-btn" onclick="window.filterKitchen('pending-payment',this)">💳 Unpaid</button>
       </div>
     </div>
   </div>
@@ -162,36 +142,39 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
 <div class="view" id="view-all-orders">
   <div class="view-header">
     <h2>All Orders</h2>
-    <button class="refresh-btn" onclick="loadAllOrders()">↻ Refresh</button>
+    <button class="refresh-btn" onclick="window.loadAllOrders()">↻ Refresh</button>
   </div>
-  <div id="all-orders-list"><div class="no-orders"><p>Loading...</p></div></div>
+  <div class="orders-grid" id="all-orders-list"><div class="no-orders"><p>Loading...</p></div></div>
 </div>
 
 <!-- PENDING PAYMENTS -->
 <div class="view" id="view-pending-orders">
   <div class="view-header">
     <h2>💳 Pending Payments</h2>
-    <button class="refresh-btn" onclick="loadPendingOrders()">↻ Refresh</button>
   </div>
-  <div id="pending-orders-list"><div class="no-orders"><p>No pending payments</p></div></div>
+  <div class="orders-grid" id="pending-orders-list"><div class="no-orders"><p>Loading...</p></div></div>
 </div>
 
 <!-- TABLES -->
 <div class="view" id="view-tables">
-  <div class="view-header"><h2>Table Status</h2><button class="refresh-btn" onclick="loadTables()">↻ Refresh</button></div>
+  <div class="view-header">
+    <h2>Table Status</h2>
+  </div>
   <div class="tables-grid" id="tables-grid"></div>
 </div>
 
-<!-- MENU MANAGEMENT -->
-<div class="view" id="view-menu-mgmt">
-  <div class="view-header"><h2>Menu Management</h2><span style="font-size:12px;color:var(--muted)">Toggle to enable/disable items</span></div>
+<!-- MENU -->
+<div class="view" id="view-menu">
+  <div class="view-header">
+    <h2>Menu Management</h2>
+  </div>
   <div id="menu-list"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, query, orderBy, getDocs, onSnapshot, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -206,17 +189,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// MENU STRUCTURE
 const MENU = [
   { cat:'Biryani 🍚', items:[
-    { id:1,  name:'Biryani',           desc:'Classic chicken biryani',                    badges:['nv'],        variants:[{l:'Half',p:140},{l:'Full',p:220},{l:'Party',p:520}] },
-    { id:2,  name:'Fry Piece Biryani', desc:'Biryani with crispy fried chicken pieces',   badges:['nv','pop'],  variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
-    { id:3,  name:'Paneer Biryani',    desc:'Fragrant biryani with soft paneer',          badges:['veg'],       variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
-    { id:4,  name:'Gongura C Biryani', desc:'Tangy Gongura chicken biryani',              badges:['nv'],        variants:[{l:'Half',p:160},{l:'Full',p:240},{l:'Party',p:540}] },
-    { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
+    { id:1,  name:'Ghee Biryani',        desc:'Fragrant basmati with ghee',                   badges:['veg'],        price:120 },
+    { id:2,  name:'Mutton Biryani',      desc:'Tender mutton with spices',                     badges:['nv'],        price:180 },
+    { id:3,  name:'Chicken Biryani',     desc:'Classic chicken biryani',                       badges:['nv','pop'],  price:140 },
+    { id:4,  name:'Gongura C Biryani',   desc:'Chicken with gongura leaves',                   badges:['nv'],        price:150 },
+    { id:5,  name:'Egg Biryani',         desc:'Biryani with boiled eggs',                      badges:['egg'],       price:110 },
   ]},
   { cat:'Rice & Noodles 🍜', items:[
-    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
-    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
+    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        variants:[{l:'Single',p:90},{l:'Double',p:150},{l:'Triple',p:200}] },
+    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       variants:[{l:'Single Egg',p:70},{l:'Double Egg',p:110},{l:'Triple Egg',p:150}] },
     { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
     { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
     { id:10, name:'Egg Noodles',       desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
@@ -259,12 +243,12 @@ const MENU = [
   { cat:'Beverages 🥤', items:[
     { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
     { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
-    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:37, name:'Sprit',             desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
     { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
     { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
     { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
     { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
-    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
+    { id:42, name:'Limca',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
     { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
   ]},
   { cat:'Smokes 🚬', items:[
@@ -285,39 +269,42 @@ const MENU = [
   ]},
 ];
 
-let allOrders = [], kitchenFilter = 'all';
+let allOrders = [];
+let kitchenFilter = 'all';
 
-// Auth check
+// AUTH CHECK
 onAuthStateChanged(auth, user => {
   if (!user) window.location.href = 'login.html';
-  else { startLive(); loadTables(); buildMenuMgmt(); }
+  else startLive();
 });
 
-// Live kitchen listener - sort by updatedAt (latest first)
+// LOAD LIVE DATA
 function startLive() {
   const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
   onSnapshot(q, snap => {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
-    // Also update pending orders view if it's currently active
-    if (document.getElementById('view-pending-orders') && document.getElementById('view-pending-orders').classList.contains('active')) {
-      loadPendingOrders();
-    }
   });
+  loadTables();
+  buildMenuMgmt();
 }
 
+// RENDER KITCHEN
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
-  // Show all statuses except paid and cancelled
   const filtered = kitchenFilter === 'all'
     ? allOrders.filter(o => o.status !== 'paid' && o.status !== 'cancelled')
     : allOrders.filter(o => o.status === kitchenFilter);
   
-  if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
+  if (!filtered.length) {
+    el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>';
+    return;
+  }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
 }
 
+// UPDATE STATS
 function updateStats() {
   const today = new Date().toDateString();
   const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
@@ -325,61 +312,152 @@ function updateStats() {
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
   const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
+
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
   document.getElementById('stat-pending-payment').textContent = pendingPayment;
 }
 
+// LOAD ALL ORDERS
 window.loadAllOrders = async function() {
   const el = document.getElementById('all-orders-list');
   el.innerHTML = '<div class="no-orders"><p>Loading...</p></div>';
   const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
   const snap = await getDocs(q);
-  if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
+  if (snap.empty) {
+    el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>';
+    return;
+  }
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
 };
 
+// LOAD PENDING ORDERS
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
-  const pending = allOrders.filter(o => o.status === 'pending-payment').sort((a, b) => {
-    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.orderedAt).getTime();
-    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.orderedAt).getTime();
-    return timeB - timeA;
-  });
-  if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
+  const pending = allOrders.filter(o => o.status === 'pending-payment');
+  if (!pending.length) {
+    el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>';
+    return;
+  }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
 
-window.loadTables = function() {
+// RENDER CARD
+function renderCard(o, editable) {
+  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', 'pending-payment': 's-pending-payment', paid: 's-paid', cancelled: 's-cancelled' };
+  const kitchenStatuses = ['pending', 'preparing', 'ready', 'served'];
+  const paymentStatuses = ['pending-payment', 'paid'];
+  const currentStatuses = (o.status === 'pending-payment' || o.status === 'paid') ? paymentStatuses : kitchenStatuses;
+  const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const itemRows = o.items ? o.items.map(i => `<div class="oc-item-row"><span>${i.name} ×${i.qty}</span><span>₹${i.lineTotal || i.price * i.qty}</span></div>`).join('') : '';
+  const special = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
+  const statusBtns = editable ? `
+    <div class="status-btns">
+      ${currentStatuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="window.setStatus('${o._id}','${s}')">${s}</button>`).join('')}
+      <button class="s-btn cancel${o.status==='cancelled'?' active':''}" onclick="window.setStatus('${o._id}','cancelled')">cancel</button>
+    </div>` : '';
+  
+  return `<div class="order-card${o.status==='pending-payment'?' pending-payment':''}">
+    <div class="oc-top">
+      <span class="oc-num">#${o.orderNumber || o._id.slice(-4)}</span>
+      <span class="oc-table">Table ${o.tableNumber}</span>
+      <span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span>
+    </div>
+    <div class="oc-items">${itemRows}</div>
+    ${special}
+    <div class="oc-footer">
+      <span class="oc-total">₹${o.total || 0}</span>
+      <span class="oc-time">${time}</span>
+    </div>
+    ${statusBtns}
+  </div>`;
+}
+
+// SET STATUS
+window.setStatus = async function(id, status) {
+  try {
+    const finalStatus = (status === 'served') ? 'pending-payment' : status;
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() });
+  }
+  catch(e) { alert('Error: ' + e.message); }
+};
+
+// FILTER KITCHEN
+window.filterKitchen = function(f, el) {
+  kitchenFilter = f;
+  document.querySelectorAll('#kitchen-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderKitchen();
+};
+
+// SHOW VIEW
+window.showView = function(view, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  el.classList.add('active');
+  
+  if (view === 'all-orders') window.loadAllOrders();
+  if (view === 'pending-orders') window.loadPendingOrders();
+  if (view === 'tables') loadTables();
+  if (view === 'menu') buildMenuMgmt();
+};
+
+// LOAD TABLES
+async function loadTables() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
   const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
   const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
-  for (let i = 1; i <= 16; i++) {
-    const t = String(i);
+  
+  // Indoor tables
+  for (let i = 1; i <= 12; i++) {
+    const t = 'I' + i;
     const isReady = readyTables.includes(t);
     const isOccupied = occupiedTables.includes(t);
     const cls = isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
-    const statusText = isReady ? '🔔 Food Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
+    const statusText = isReady ? '🔔 Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
     const div = document.createElement('div');
     div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">${i}</div><div class="table-status">${statusText}</div>`;
+    div.innerHTML = `<div class="table-num">${t}</div><div class="table-status">${statusText}</div>`;
     grid.appendChild(div);
   }
-};
+  
+  // Outdoor tables
+  for (let i = 1; i <= 10; i++) {
+    const t = 'O' + i;
+    const isReady = readyTables.includes(t);
+    const isOccupied = occupiedTables.includes(t);
+    const cls = isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
+    const statusText = isReady ? '🔔 Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
+    const div = document.createElement('div');
+    div.className = 'table-card ' + cls;
+    div.innerHTML = `<div class="table-num">${t}</div><div class="table-status">${statusText}</div>`;
+    grid.appendChild(div);
+  }
+  
+  // Parcels
+  for (let i = 1; i <= 3; i++) {
+    const t = 'P' + i;
+    const isReady = readyTables.includes(t);
+    const isOccupied = occupiedTables.includes(t);
+    const cls = isReady ? 'ready' : isOccupied ? 'occupied' : 'available';
+    const statusText = isReady ? '🔔 Ready' : isOccupied ? '📦 Parcel' : '✓ Available';
+    const div = document.createElement('div');
+    div.className = 'table-card ' + cls;
+    div.innerHTML = `<div class="table-num">${t}</div><div class="table-status">${statusText}</div>`;
+    grid.appendChild(div);
+  }
+}
 
+// BUILD MENU MANAGEMENT
 async function buildMenuMgmt() {
-  // Load menu item states from Firebase
   let menuStates = {};
   try {
     const snap = await getDocs(collection(db, 'menuItems'));
-    snap.forEach(doc => {
-      menuStates[doc.id] = doc.data().enabled !== false;
-    });
-  } catch(e) {
-    console.log('Menu states loaded (or not found)');
-  }
+    snap.forEach(doc => { menuStates[doc.id] = doc.data().enabled !== false; });
+  } catch(e) { console.log('Menu states loaded'); }
   
   const el = document.getElementById('menu-list');
   el.innerHTML = MENU.map(section => `
@@ -388,11 +466,12 @@ async function buildMenuMgmt() {
       ${section.items.map(item => `
         <div class="menu-item-row">
           <div class="mi-info"><div class="mi-name">${item.name}</div><div class="mi-price">₹${item.price || (item.variants ? item.variants[0].p : 'N/A')}</div></div>
-          <label class="mi-toggle"><input type="checkbox" ${menuStates[item.id] !== false ? 'checked' : ''} onchange="toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
+          <label class="mi-toggle"><input type="checkbox" ${menuStates[item.id] !== false ? 'checked' : ''} onchange="window.toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
         </div>`).join('')}
     </div>`).join('');
 }
 
+// TOGGLE ITEM
 window.toggleItem = async function(id, enabled) {
   try {
     await updateDoc(doc(db, 'menuItems', String(id)), { id, enabled });
@@ -402,69 +481,17 @@ window.toggleItem = async function(id, enabled) {
   }
 };
 
-function renderCard(o, editable) {
-  const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served', 'pending-payment': 's-pending-payment', paid: 's-paid', cancelled: 's-cancelled' };
-  const kitchenStatuses = ['pending', 'preparing', 'ready', 'served'];
-  const paymentStatuses = ['pending-payment', 'paid'];
-  const currentStatuses = (o.status === 'pending-payment' || o.status === 'paid') ? paymentStatuses : kitchenStatuses;
-  const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '—';
-  const isUrgent = o.status === 'pending' && o.orderedAt && (Date.now() - new Date(o.orderedAt).getTime()) > 10 * 60 * 1000;
-  const isPendingPayment = o.status === 'pending-payment';
-  const itemRows = o.items ? o.items.map(i => `<div class="oc-item-row"><span>${i.emoji||''} ${i.name} ×${i.qty}</span><span>₹${i.lineTotal||i.price*i.qty}</span></div>`).join('') : '';
-  const special = o.specialRequest ? `<div class="oc-special">📝 ${o.specialRequest}</div>` : '';
-  const statusBtns = editable ? `
-    <div class="status-btns">
-      ${currentStatuses.map(s => `<button class="s-btn${o.status===s?' active':''}" onclick="setStatus('${o._id}','${s}')">${s}</button>`).join('')}
-      <button class="s-btn cancel${o.status==='cancelled'?' active':''}" onclick="setStatus('${o._id}','cancelled')">cancel</button>
-    </div>` : '';
-  return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
-    <div class="oc-top">
-      <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
-      <span class="oc-table">Table ${o.tableNumber}</span>
-      <span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span>
-    </div>
-    ${itemRows}
-    ${special}
-    <div class="oc-footer"><span class="oc-total">₹${o.total}</span><span class="oc-time">${time}${isUrgent?' ⚠️ Urgent':''}${isPendingPayment?' 💳 Payment Pending':''}</span></div>
-    ${statusBtns}
-  </div>`;
-}
-
-window.setStatus = async function(id, status) {
-  try { 
-    // Auto-transition: when order is marked "served", automatically set to "pending-payment"
-    const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
+// LOGOUT
+window.logOut = async function() {
+  try {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  } catch(e) {
+    alert('Logout error: ' + e.message);
   }
-  catch(e) { alert('Error: ' + e.message); }
 };
 
-window.filterKitchen = function(f, el) {
-  kitchenFilter = f;
-  document.querySelectorAll('#kitchen-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  renderKitchen();
-};
-
-window.showView = function(view, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + view).classList.add('active');
-  el.classList.add('active');
-  if (view === 'all-orders') loadAllOrders();
-  if (view === 'pending-orders') loadPendingOrders();
-  if (view === 'tables') loadTables();
-};
-
-window.logout = async function() {
-  await signOut(auth);
-  window.location.href = 'login.html';
-};
-
-// Check hash for direct kitchen link
-if (window.location.hash === '#kitchen') {
-  document.querySelectorAll('.tab')[0].click();
-}
 </script>
+
 </body>
 </html>
