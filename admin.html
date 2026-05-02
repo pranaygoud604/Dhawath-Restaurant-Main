@@ -151,7 +151,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
         <button class="filter-btn" onclick="filterKitchen('pending',this)">Pending</button>
         <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
         <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
-        <button class="filter-btn" onclick="filterKitchen('pending-payment',this)">💳 Payment Pending</button>
       </div>
     </div>
   </div>
@@ -293,15 +292,15 @@ onAuthStateChanged(auth, user => {
   else { startLive(); loadTables(); buildMenuMgmt(); }
 });
 
-// Live kitchen listener - sort by updatedAt (latest first)
+// Live kitchen listener
 function startLive() {
-  const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
+  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
   onSnapshot(q, snap => {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
     // Also update pending orders view if it's currently active
-    if (document.getElementById('view-pending-orders') && document.getElementById('view-pending-orders').classList.contains('active')) {
+    if (document.getElementById('view-pending-orders').classList.contains('active')) {
       loadPendingOrders();
     }
   });
@@ -310,7 +309,7 @@ function startLive() {
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
   const filtered = kitchenFilter === 'all'
-    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid')
+    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment')
     : allOrders.filter(o => o.status === kitchenFilter);
   if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
@@ -334,7 +333,7 @@ function updateStats() {
 window.loadAllOrders = async function() {
   const el = document.getElementById('all-orders-list');
   el.innerHTML = '<div class="no-orders"><p>Loading...</p></div>';
-  const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
+  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
@@ -342,11 +341,7 @@ window.loadAllOrders = async function() {
 
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
-  const pending = allOrders.filter(o => o.status === 'pending-payment').sort((a, b) => {
-    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.orderedAt).getTime();
-    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.orderedAt).getTime();
-    return timeB - timeA;
-  });
+  const pending = allOrders.filter(o => o.status === 'pending-payment');
   if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
@@ -434,7 +429,7 @@ window.setStatus = async function(id, status) {
   try { 
     // Auto-transition: when order is marked "served", automatically set to "pending-payment"
     const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
   }
   catch(e) { alert('Error: ' + e.message); }
 };

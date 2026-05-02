@@ -54,12 +54,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tbl-btn{padding:10px 4px;font-size:13px}
 }
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
-.search-bar{padding:14px 14px;background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
-.search-bar input{width:100%;border:2px solid var(--border);border-radius:20px;padding:10px 16px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);color:var(--ink);transition:all 0.2s}
-.search-bar input::placeholder{color:var(--muted);opacity:0.7}
-.search-bar input:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(200,146,42,0.1)}
-.no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
-.category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:44px;z-index:5}
+.category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
 .cat-btn{background:none;border:1.5px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.18s}
 .cat-btn.active,.cat-btn:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 .section-title{padding:14px 18px 8px;font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)}
@@ -196,9 +191,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   <div class="app-body">
     <div id="menu-view">
       <div class="menu-side">
-        <div class="search-bar">
-          <input type="text" id="search-input" placeholder="🔍 Search items..." onkeyup="searchItems(this.value)">
-        </div>
         <div class="category-nav" id="cat-nav"></div>
         <div id="menu-content"></div>
       </div>
@@ -276,8 +268,8 @@ const MENU = [
     { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
   ]},
   { cat:'Rice & Noodles 🍜', items:[
-    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        variants:[{l:'Single',p:90},{l:'Double',p:150},{l:'Triple',p:200}] },
-    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       variants:[{l:'Single Egg',p:70},{l:'Double Egg',p:110},{l:'Triple Egg',p:150}] },
+    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
+    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
     { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
     { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
     { id:10, name:'Egg Noodles',       desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
@@ -320,12 +312,12 @@ const MENU = [
   { cat:'Beverages 🥤', items:[
     { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
     { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
-    { id:37, name:'Sprit',             desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
     { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
     { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
     { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
     { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
-    { id:42, name:'Limca',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
+    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
     { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
   ]},
   { cat:'Smokes 🚬', items:[
@@ -346,7 +338,7 @@ const MENU = [
   ]},
 ];
 
-let cart = {}, tableNum = '', selV = {}, menuItemStates = {}, searchQuery = '';
+let cart = {}, tableNum = '', selV = {}, menuItemStates = {};
 
 // Load menu item enabled/disabled states from Firebase
 async function loadMenuItemStates() {
@@ -417,11 +409,6 @@ window.selectTable = async () => {
   showMenu(); renderCart(); startLive();
 };
 
-function searchItems(query) {
-  searchQuery = query.trim().toLowerCase();
-  showMenu();
-}
-
 function showMenu() {
   const nav = document.getElementById('cat-nav');
   const mc = document.getElementById('menu-content');
@@ -429,67 +416,57 @@ function showMenu() {
   nav.innerHTML = '';
   mc.innerHTML = '';
   
-  if (searchQuery) {
-    // Search mode - show only matching items
-    let results = [];
-    for (let sec of MENU) {
-      for (let item of sec.items) {
-        let name = item.name.toLowerCase();
-        let desc = (item.desc || '').toLowerCase();
-        if (name.includes(searchQuery) || desc.includes(searchQuery)) {
-          results.push(item);
-        }
+  // Show categories
+  for (let i = 0; i < MENU.length; i++) {
+    let sec = MENU[i];
+    
+    // Category button
+    let btn = document.createElement('button');
+    btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = sec.cat;
+    btn.onclick = function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      
+      let catDiv = document.getElementById('cat-section-' + i);
+      if (catDiv) {
+        catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    };
+    nav.appendChild(btn);
+    
+    // Category section
+    let section = document.createElement('div');
+    section.id = 'cat-section-' + i;
+    section.style.scrollMarginTop = '120px';
+    
+    // Category header
+    let header = document.createElement('div');
+    header.style.padding = '14px 18px 8px';
+    header.style.fontFamily = 'Playfair Display, serif';
+    header.style.fontSize = '18px';
+    header.style.fontWeight = '600';
+    header.style.color = 'var(--dark)';
+    header.style.background = 'var(--cream)';
+    header.style.borderBottom = '1px solid var(--border)';
+    header.textContent = sec.cat;
+    section.appendChild(header);
+    
+    // Items grid
+    let grid = document.createElement('div');
+    grid.style.padding = '10px';
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = '1fr';
+    grid.style.gap = '8px';
+    
+    for (let item of sec.items) {
+      let isEnabled = menuItemStates[String(item.id)] !== false;
+      grid.innerHTML += (isEnabled ? renderItem(item) : renderDisabledItem(item));
     }
     
-    if (results.length === 0) {
-      mc.innerHTML = '<div style="padding:40px 20px; text-align:center; color:var(--muted);">No items found</div>';
-      return;
-    }
-    
-    let html = '<div style="padding:14px 18px 8px;font-family:Playfair Display,serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)">Search Results (' + results.length + ')</div>';
-    html += '<div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:8px;">';
-    for (let item of results) {
-      html += renderItem(item);
-    }
-    html += '</div>';
-    mc.innerHTML = html;
-  } else {
-    // Normal mode - show categories
-    for (let i = 0; i < MENU.length; i++) {
-      let sec = MENU[i];
-      let btn = document.createElement('button');
-      btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
-      btn.textContent = sec.cat;
-      btn.onclick = function() {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-      };
-      nav.appendChild(btn);
-      
-      let div = document.createElement('div');
-      div.style.padding = '14px 18px 8px';
-      div.style.fontFamily = 'Playfair Display, serif';
-      div.style.fontSize = '18px';
-      div.style.color = 'var(--dark)';
-      div.style.background = 'var(--cream)';
-      div.style.borderBottom = '1px solid var(--border)';
-      div.innerHTML = sec.cat;
-      
-      let grid = document.createElement('div');
-      grid.style.padding = '10px 14px';
-      grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = '1fr';
-      grid.style.gap = '8px';
-      
-      for (let item of sec.items) {
-        let isEnabled = menuItemStates[String(item.id)] !== false;
-        grid.innerHTML += (isEnabled ? renderItem(item) : renderDisabledItem(item));
-      }
-      
-      mc.appendChild(div);
-      mc.appendChild(grid);
-    }
+    section.appendChild(grid);
+    mc.appendChild(section);
   }
 }
 
