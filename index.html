@@ -54,15 +54,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tbl-btn{padding:10px 4px;font-size:13px}
 }
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
-.search-bar{padding:12px 12px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.search-bar input{width:100%;border:1.5px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);color:var(--ink);transition:all 0.2s}
-.search-bar input:focus{border-color:var(--gold);background:var(--white)}
+.search-bar{padding:14px 14px;background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
+.search-bar input{width:100%;border:2px solid var(--border);border-radius:20px;padding:10px 16px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);color:var(--ink);transition:all 0.2s}
+.search-bar input::placeholder{color:var(--muted);opacity:0.7}
+.search-bar input:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(200,146,42,0.1)}
 .no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
 .category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:44px;z-index:5}
 .cat-btn{background:none;border:1.5px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.18s}
 .cat-btn.active,.cat-btn:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 .section-title{padding:14px 18px 8px;font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)}
-.items-grid{padding:10px 14px;display:grid;gap:8px}
+.items-grid{padding:10px 14px;display:grid;grid-template-columns:1fr;gap:8px}
 .item-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px;transition:border-color 0.18s}
 .item-card:hover{border-color:var(--gold)}
 .item-card.item-unavailable{opacity:0.6;background:rgba(255,255,255,0.7)}
@@ -417,50 +418,90 @@ window.selectTable = async () => {
 };
 
 function searchItems(query) {
-  searchQuery = query.toLowerCase().trim();
+  console.log('Search triggered:', query);
+  searchQuery = query.trim().toLowerCase();
+  console.log('Search query:', searchQuery);
   buildMenu();
+  console.log('buildMenu called');
 }
 
 function buildMenu() {
-  const nav = document.getElementById('cat-nav'); const mc = document.getElementById('menu-content');
-  nav.innerHTML = ''; mc.innerHTML = '';
+  console.log('buildMenu started, searchQuery:', searchQuery);
+  const nav = document.getElementById('cat-nav');
+  const mc = document.getElementById('menu-content');
+  
+  if (!nav || !mc) {
+    console.error('Menu containers not found!');
+    return;
+  }
+  
+  nav.innerHTML = '';
+  mc.innerHTML = '';
   
   // If searching, show only matching items
-  if (searchQuery) {
+  if (searchQuery && searchQuery.length > 0) {
+    console.log('In search mode');
     const allItems = [];
+    
     MENU.forEach(sec => {
       sec.items.forEach(item => {
-        const isEnabled = menuItemStates[String(item.id)] !== false; // defaults to true if not set
-        if ((item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery)) && isEnabled) {
+        const isEnabled = menuItemStates[String(item.id)] !== false;
+        const nameMatch = item.name.toLowerCase().includes(searchQuery);
+        const descMatch = item.desc && item.desc.toLowerCase().includes(searchQuery);
+        
+        console.log(`Checking ${item.name}: enabled=${isEnabled}, nameMatch=${nameMatch}, descMatch=${descMatch}`);
+        
+        if ((nameMatch || descMatch) && isEnabled) {
+          console.log(`Adding ${item.name} to results`);
           allItems.push(item);
         }
       });
     });
     
+    console.log('Total search results:', allItems.length);
+    
     if (allItems.length === 0) {
       mc.innerHTML = '<div class="no-results"><p>No items found matching "<strong>' + searchQuery + '</strong>"</p></div>';
+      console.log('Displayed no results message');
       return;
     }
     
-    const div = document.createElement('div'); 
-    div.innerHTML = `<div class="section-title">Search Results (${allItems.length})</div><div class="items-grid">${allItems.map(item => renderItem(item)).join('')}</div>`;
-    mc.appendChild(div);
+    const resultHTML = allItems.map(item => renderItem(item)).join('');
+    console.log('Result HTML length:', resultHTML.length);
+    
+    mc.innerHTML = `<div class="section-title">Search Results (${allItems.length})</div><div class="items-grid">${resultHTML}</div>`;
+    console.log('Search results displayed');
   } else {
     // Show categories normally
+    console.log('In normal category mode');
     MENU.forEach((sec, i) => {
       const hasAnyEnabled = sec.items.some(item => menuItemStates[String(item.id)] !== false);
-      if (!hasAnyEnabled) return;
+      if (!hasAnyEnabled) {
+        console.log(`Skipping category ${sec.cat} - all items disabled`);
+        return;
+      }
+      
       const btn = document.createElement('button');
-      btn.className = 'cat-btn' + (i === 0 ? ' active' : ''); btn.textContent = sec.cat;
-      btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' }); };
+      btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = sec.cat;
+      btn.onclick = () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' });
+      };
       nav.appendChild(btn);
-      const div = document.createElement('div'); div.id = 's' + sec.cat.replace(/\W/g, '');
-      div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${sec.items.map(item => {
+      
+      const div = document.createElement('div');
+      div.id = 's' + sec.cat.replace(/\W/g, '');
+      const itemsHTML = sec.items.map(item => {
         const isEnabled = menuItemStates[String(item.id)] !== false;
         return isEnabled ? renderItem(item) : renderDisabledItem(item);
-      }).join('')}</div>`;
+      }).join('');
+      
+      div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${itemsHTML}</div>`;
       mc.appendChild(div);
     });
+    console.log('Categories displayed');
   }
 }
 
