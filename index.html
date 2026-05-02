@@ -418,31 +418,40 @@ window.selectTable = async () => {
 };
 
 function searchItems(query) {
+  console.log('🔍 Search Input Received:', query);
   searchQuery = query.trim().toLowerCase();
+  console.log('🔍 Trimmed & Lowercased:', searchQuery);
   showMenu();
 }
 
 function showMenu() {
+  console.log('📋 showMenu() Called. searchQuery:', searchQuery);
   const nav = document.getElementById('cat-nav');
   const mc = document.getElementById('menu-content');
+  
+  console.log('📋 nav element:', nav, 'mc element:', mc);
   
   nav.innerHTML = '';
   mc.innerHTML = '';
   
   if (searchQuery) {
-    // Search mode - show only matching items
+    console.log('🔎 IN SEARCH MODE - searching for:', searchQuery);
     let results = [];
     for (let sec of MENU) {
       for (let item of sec.items) {
         let name = item.name.toLowerCase();
         let desc = (item.desc || '').toLowerCase();
         if (name.includes(searchQuery) || desc.includes(searchQuery)) {
+          console.log('✅ MATCH FOUND:', item.name);
           results.push(item);
         }
       }
     }
     
+    console.log('📊 Total results found:', results.length);
+    
     if (results.length === 0) {
+      console.log('❌ No results, showing message');
       mc.innerHTML = '<div style="padding:40px 20px; text-align:center; color:var(--muted);">No items found</div>';
       return;
     }
@@ -453,9 +462,11 @@ function showMenu() {
       html += renderItem(item);
     }
     html += '</div>';
+    console.log('✅ HTML created, length:', html.length);
     mc.innerHTML = html;
+    console.log('✅ HTML inserted into DOM');
   } else {
-    // Normal mode - show categories
+    console.log('📚 IN NORMAL MODE - showing categories');
     for (let i = 0; i < MENU.length; i++) {
       let sec = MENU[i];
       let btn = document.createElement('button');
@@ -490,6 +501,7 @@ function showMenu() {
       mc.appendChild(div);
       mc.appendChild(grid);
     }
+    console.log('✅ Categories displayed');
   }
 }
 
