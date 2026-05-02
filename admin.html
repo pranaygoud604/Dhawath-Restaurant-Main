@@ -307,50 +307,12 @@ function startLive() {
   });
 }
 
-// Consolidate orders by table - group unpaid orders from same table
-function consolidateOrdersByTable(orders) {
-  const consolidated = {};
-  const seen = new Set();
-  
-  // Group unpaid orders by table
-  for (let order of orders) {
-    if (order.status !== 'paid' && order.status !== 'cancelled' && order.tableNumber && !seen.has(order._id)) {
-      const key = order.tableNumber;
-      seen.add(order._id);
-      
-      if (!consolidated[key]) {
-        consolidated[key] = { ...order, items: [...(order.items || [])], isConsolidated: false };
-      } else {
-        // Add items from this order to the consolidated one
-        if (order.items) {
-          consolidated[key].items = [...consolidated[key].items, ...order.items];
-        }
-        consolidated[key].isConsolidated = true;
-      }
-    } else {
-      // Paid/cancelled orders and orders without table number keep their own entry
-      if (!seen.has(order._id)) {
-        const key = order._id;
-        consolidated[key] = order;
-        seen.add(order._id);
-      }
-    }
-  }
-  
-  return Object.values(consolidated);
-}
-
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
   // Show all statuses except paid and cancelled
-  let filtered = kitchenFilter === 'all'
+  const filtered = kitchenFilter === 'all'
     ? allOrders.filter(o => o.status !== 'paid' && o.status !== 'cancelled')
     : allOrders.filter(o => o.status === kitchenFilter);
-  
-  // Only consolidate when showing "all" view, not specific filters
-  if (kitchenFilter === 'all') {
-    filtered = consolidateOrdersByTable(filtered);
-  }
   
   if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
