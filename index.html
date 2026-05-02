@@ -414,94 +414,82 @@ window.selectTable = async () => {
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('table-badge').textContent = 'Table ' + tableNum;
   await loadMenuItemStates();
-  buildMenu(); renderCart(); startLive();
+  showMenu(); renderCart(); startLive();
 };
 
 function searchItems(query) {
-  console.log('Search triggered:', query);
   searchQuery = query.trim().toLowerCase();
-  console.log('Search query:', searchQuery);
-  buildMenu();
-  console.log('buildMenu called');
+  showMenu();
 }
 
-function buildMenu() {
-  console.log('buildMenu started, searchQuery:', searchQuery);
+function showMenu() {
   const nav = document.getElementById('cat-nav');
   const mc = document.getElementById('menu-content');
-  
-  if (!nav || !mc) {
-    console.error('Menu containers not found!');
-    return;
-  }
   
   nav.innerHTML = '';
   mc.innerHTML = '';
   
-  // If searching, show only matching items
-  if (searchQuery && searchQuery.length > 0) {
-    console.log('In search mode');
-    const allItems = [];
-    
-    MENU.forEach(sec => {
-      sec.items.forEach(item => {
-        const isEnabled = menuItemStates[String(item.id)] !== false;
-        const nameMatch = item.name.toLowerCase().includes(searchQuery);
-        const descMatch = item.desc && item.desc.toLowerCase().includes(searchQuery);
-        
-        console.log(`Checking ${item.name}: enabled=${isEnabled}, nameMatch=${nameMatch}, descMatch=${descMatch}`);
-        
-        if ((nameMatch || descMatch) && isEnabled) {
-          console.log(`Adding ${item.name} to results`);
-          allItems.push(item);
+  if (searchQuery) {
+    // Search mode - show only matching items
+    let results = [];
+    for (let sec of MENU) {
+      for (let item of sec.items) {
+        let name = item.name.toLowerCase();
+        let desc = (item.desc || '').toLowerCase();
+        if (name.includes(searchQuery) || desc.includes(searchQuery)) {
+          results.push(item);
         }
-      });
-    });
+      }
+    }
     
-    console.log('Total search results:', allItems.length);
-    
-    if (allItems.length === 0) {
-      mc.innerHTML = '<div class="no-results"><p>No items found matching "<strong>' + searchQuery + '</strong>"</p></div>';
-      console.log('Displayed no results message');
+    if (results.length === 0) {
+      mc.innerHTML = '<div style="padding:40px 20px; text-align:center; color:var(--muted);">No items found</div>';
       return;
     }
     
-    const resultHTML = allItems.map(item => renderItem(item)).join('');
-    console.log('Result HTML length:', resultHTML.length);
-    
-    mc.innerHTML = `<div class="section-title">Search Results (${allItems.length})</div><div class="items-grid">${resultHTML}</div>`;
-    console.log('Search results displayed');
+    let html = '<div style="padding:14px 18px 8px;font-family:Playfair Display,serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)">Search Results (' + results.length + ')</div>';
+    html += '<div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:8px;">';
+    for (let item of results) {
+      html += renderItem(item);
+    }
+    html += '</div>';
+    mc.innerHTML = html;
   } else {
-    // Show categories normally
-    console.log('In normal category mode');
-    MENU.forEach((sec, i) => {
-      const hasAnyEnabled = sec.items.some(item => menuItemStates[String(item.id)] !== false);
-      if (!hasAnyEnabled) {
-        console.log(`Skipping category ${sec.cat} - all items disabled`);
-        return;
-      }
-      
-      const btn = document.createElement('button');
+    // Normal mode - show categories
+    for (let i = 0; i < MENU.length; i++) {
+      let sec = MENU[i];
+      let btn = document.createElement('button');
       btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
       btn.textContent = sec.cat;
-      btn.onclick = () => {
+      btn.onclick = function() {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' });
+        this.classList.add('active');
       };
       nav.appendChild(btn);
       
-      const div = document.createElement('div');
-      div.id = 's' + sec.cat.replace(/\W/g, '');
-      const itemsHTML = sec.items.map(item => {
-        const isEnabled = menuItemStates[String(item.id)] !== false;
-        return isEnabled ? renderItem(item) : renderDisabledItem(item);
-      }).join('');
+      let div = document.createElement('div');
+      div.style.padding = '14px 18px 8px';
+      div.style.fontFamily = 'Playfair Display, serif';
+      div.style.fontSize = '18px';
+      div.style.color = 'var(--dark)';
+      div.style.background = 'var(--cream)';
+      div.style.borderBottom = '1px solid var(--border)';
+      div.innerHTML = sec.cat;
       
-      div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${itemsHTML}</div>`;
+      let grid = document.createElement('div');
+      grid.style.padding = '10px 14px';
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = '1fr';
+      grid.style.gap = '8px';
+      
+      for (let item of sec.items) {
+        let isEnabled = menuItemStates[String(item.id)] !== false;
+        grid.innerHTML += (isEnabled ? renderItem(item) : renderDisabledItem(item));
+      }
+      
       mc.appendChild(div);
-    });
-    console.log('Categories displayed');
+      mc.appendChild(grid);
+    }
   }
 }
 
@@ -538,7 +526,7 @@ function renderDisabledItem(item) {
   return `<div class="item-card item-unavailable"><div class="item-info"><div class="badges">${bhtml}</div><div class="item-name">${item.name}</div><div class="item-desc">${item.desc}</div></div><div class="ctrl-wrap"><span class="unavailable-label">⛔ Item Not Available</span></div></div>`;
 }
 
-window._sv  = (id, l, p) => { selV[id] = { l, p }; buildMenu(); };
+window._sv  = (id, l, p) => { selV[id] = { l, p }; showMenu(); };
 window._add = id => { const i = fi(id); cart[id] = { ...i, qty:1, variant:null, linePrice:i.price, _key:id }; refresh(); };
 window._chg = (id, d) => { if (!cart[id]) return; cart[id].qty += d; if (cart[id].qty <= 0) delete cart[id]; refresh(); };
 window._av  = id => { const i = fi(id); const v = selV[id]||i.variants[0]; const k = id+'_'+v.l; cart[k] = { ...i, qty:1, variant:v.l, linePrice:v.p, _key:k }; refresh(); };
@@ -546,7 +534,7 @@ window._inc = k => { if (cart[k]) { cart[k].qty++; refresh(); } };
 window._rk  = k => { if (cart[k]) { cart[k].qty--; if (cart[k].qty <= 0) delete cart[k]; refresh(); } };
 const fi    = id => { for (const s of MENU) for (const i of s.items) if (i.id == id) return i; };
 
-function refresh() { buildMenu(); renderCart(); updateCount(); }
+function refresh() { showMenu(); renderCart(); updateCount(); }
 
 function renderCart() {
   const el = document.getElementById('order-items');
@@ -620,7 +608,7 @@ function startLive() {
     snap.forEach(doc => {
       menuItemStates[String(doc.id)] = doc.data().enabled !== false;
     });
-    if (document.getElementById('menu-view').style.display === 'grid') buildMenu();
+    if (document.getElementById('menu-view').style.display === 'grid') showMenu();
   });
 }
 
