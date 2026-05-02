@@ -52,6 +52,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .ts-card p{font-size:12px;margin-bottom:14px}
 .table-grid{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
 .tbl-btn{padding:10px 4px;font-size:13px}
+.search-bar{padding:12px 12px}
+.search-bar input{padding:12px 14px;font-size:16px}
+.category-nav{top:56px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cat-btn{padding:8px 12px;font-size:11px}
+.item-card{padding:8px 10px;gap:8px}
 }
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
 .search-bar{padding:14px 14px;background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
@@ -418,75 +423,86 @@ window.selectTable = async () => {
 };
 
 function searchItems(query) {
-  console.log('🔍 Search Input Received:', query);
   searchQuery = query.trim().toLowerCase();
-  console.log('🔍 Trimmed & Lowercased:', searchQuery);
   showMenu();
 }
 
 function showMenu() {
-  console.log('📋 showMenu() Called. searchQuery:', searchQuery);
   const nav = document.getElementById('cat-nav');
   const mc = document.getElementById('menu-content');
-  
-  console.log('📋 nav element:', nav, 'mc element:', mc);
   
   nav.innerHTML = '';
   mc.innerHTML = '';
   
   if (searchQuery) {
-    console.log('🔎 IN SEARCH MODE - searching for:', searchQuery);
+    // SEARCH MODE
     let results = [];
     for (let sec of MENU) {
       for (let item of sec.items) {
         let name = item.name.toLowerCase();
         let desc = (item.desc || '').toLowerCase();
         if (name.includes(searchQuery) || desc.includes(searchQuery)) {
-          console.log('✅ MATCH FOUND:', item.name);
           results.push(item);
         }
       }
     }
     
-    console.log('📊 Total results found:', results.length);
-    
     if (results.length === 0) {
-      console.log('❌ No results, showing message');
       mc.innerHTML = '<div style="padding:40px 20px; text-align:center; color:var(--muted);">No items found</div>';
       return;
     }
     
+    // Build search results HTML
     let html = '<div style="padding:14px 18px 8px;font-family:Playfair Display,serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)">Search Results (' + results.length + ')</div>';
     html += '<div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:8px;">';
     for (let item of results) {
       html += renderItem(item);
     }
     html += '</div>';
-    console.log('✅ HTML created, length:', html.length);
     mc.innerHTML = html;
-    console.log('✅ HTML inserted into DOM');
   } else {
-    console.log('📚 IN NORMAL MODE - showing categories');
+    // NORMAL MODE - Show all categories with items
+    
+    // Build category buttons in nav
     for (let i = 0; i < MENU.length; i++) {
       let sec = MENU[i];
       let btn = document.createElement('button');
       btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
       btn.textContent = sec.cat;
-      btn.onclick = function() {
+      
+      // Scroll to category when clicked
+      btn.onclick = function(e) {
+        e.preventDefault();
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
+        
+        let catDiv = document.getElementById('cat-section-' + i);
+        if (catDiv) {
+          catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       };
+      
       nav.appendChild(btn);
+    }
+    
+    // Build all category sections with items
+    for (let i = 0; i < MENU.length; i++) {
+      let sec = MENU[i];
       
-      let div = document.createElement('div');
-      div.style.padding = '14px 18px 8px';
-      div.style.fontFamily = 'Playfair Display, serif';
-      div.style.fontSize = '18px';
-      div.style.color = 'var(--dark)';
-      div.style.background = 'var(--cream)';
-      div.style.borderBottom = '1px solid var(--border)';
-      div.innerHTML = sec.cat;
+      // Category header
+      let catHeader = document.createElement('div');
+      catHeader.id = 'cat-section-' + i;
+      catHeader.style.padding = '14px 18px 8px';
+      catHeader.style.fontFamily = 'Playfair Display, serif';
+      catHeader.style.fontSize = '18px';
+      catHeader.style.color = 'var(--dark)';
+      catHeader.style.background = 'var(--cream)';
+      catHeader.style.borderBottom = '1px solid var(--border)';
+      catHeader.style.scrollMarginTop = '60px';
+      catHeader.textContent = sec.cat;
+      mc.appendChild(catHeader);
       
+      // Category items grid
       let grid = document.createElement('div');
       grid.style.padding = '10px 14px';
       grid.style.display = 'grid';
@@ -498,10 +514,8 @@ function showMenu() {
         grid.innerHTML += (isEnabled ? renderItem(item) : renderDisabledItem(item));
       }
       
-      mc.appendChild(div);
       mc.appendChild(grid);
     }
-    console.log('✅ Categories displayed');
   }
 }
 
