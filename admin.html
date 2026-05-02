@@ -138,7 +138,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
   <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
   <div class="stat-card"><div class="stat-label">💳 Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
-  <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
 <!-- KITCHEN VIEW -->
@@ -151,6 +150,8 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
         <button class="filter-btn" onclick="filterKitchen('pending',this)">Pending</button>
         <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
         <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
+        <button class="filter-btn" onclick="filterKitchen('served',this)">Served</button>
+        <button class="filter-btn" onclick="filterKitchen('pending-payment',this)">💳 Unpaid</button>
       </div>
     </div>
   </div>
@@ -292,25 +293,57 @@ onAuthStateChanged(auth, user => {
   else { startLive(); loadTables(); buildMenuMgmt(); }
 });
 
-// Live kitchen listener
+// Live kitchen listener - sort by updatedAt (latest first)
 function startLive() {
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
   onSnapshot(q, snap => {
     allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
     renderKitchen();
     updateStats();
     // Also update pending orders view if it's currently active
-    if (document.getElementById('view-pending-orders').classList.contains('active')) {
+    if (document.getElementById('view-pending-orders') && document.getElementById('view-pending-orders').classList.contains('active')) {
       loadPendingOrders();
     }
   });
 }
 
+// Consolidate orders by table - group unpaid orders from same table
+function consolidateOrdersByTable(orders) {
+  const consolidated = {};
+  
+  // Group unpaid orders by table
+  for (let order of orders) {
+    if (order.status !== 'paid' && order.status !== 'cancelled') {
+      const key = order.tableNumber;
+      if (!consolidated[key]) {
+        consolidated[key] = { ...order, items: [...(order.items || [])], isConsolidated: false };
+      } else {
+        // Add items from this order to the consolidated one
+        if (order.items) {
+          consolidated[key].items = [...consolidated[key].items, ...order.items];
+        }
+        consolidated[key].isConsolidated = true;
+      }
+    } else {
+      // Paid/cancelled orders keep their own entry
+      const key = order._id;
+      consolidated[key] = order;
+    }
+  }
+  
+  return Object.values(consolidated);
+}
+
 function renderKitchen() {
   const el = document.getElementById('kitchen-orders');
-  const filtered = kitchenFilter === 'all'
-    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment')
+  // Show all statuses except paid and cancelled
+  let filtered = kitchenFilter === 'all'
+    ? allOrders.filter(o => o.status !== 'paid' && o.status !== 'cancelled')
     : allOrders.filter(o => o.status === kitchenFilter);
+  
+  // Consolidate orders by table for unpaid statuses
+  filtered = consolidateOrdersByTable(filtered);
+  
   if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
   el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
 }
@@ -322,18 +355,16 @@ function updateStats() {
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const pending = allOrders.filter(o => o.status === 'pending').length;
   const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
-  const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
   document.getElementById('stat-pending').textContent = pending;
   document.getElementById('stat-pending-payment').textContent = pendingPayment;
-  document.getElementById('stat-tables').textContent = tables;
 }
 
 window.loadAllOrders = async function() {
   const el = document.getElementById('all-orders-list');
   el.innerHTML = '<div class="no-orders"><p>Loading...</p></div>';
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'orders'), orderBy('updatedAt', 'desc'));
   const snap = await getDocs(q);
   if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
@@ -341,7 +372,11 @@ window.loadAllOrders = async function() {
 
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
-  const pending = allOrders.filter(o => o.status === 'pending-payment');
+  const pending = allOrders.filter(o => o.status === 'pending-payment').sort((a, b) => {
+    const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.orderedAt).getTime();
+    const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.orderedAt).getTime();
+    return timeB - timeA;
+  });
   if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
@@ -429,7 +464,7 @@ window.setStatus = async function(id, status) {
   try { 
     // Auto-transition: when order is marked "served", automatically set to "pending-payment"
     const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
   }
   catch(e) { alert('Error: ' + e.message); }
 };
