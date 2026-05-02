@@ -52,11 +52,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .ts-card p{font-size:12px;margin-bottom:14px}
 .table-grid{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
 .tbl-btn{padding:10px 4px;font-size:13px}
-.search-bar{padding:12px 12px}
-.search-bar input{padding:12px 14px;font-size:16px}
-.category-nav{top:56px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cat-btn{padding:8px 12px;font-size:11px}
-.item-card{padding:8px 10px;gap:8px}
 }
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
 .search-bar{padding:14px 14px;background:var(--white);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
@@ -435,7 +430,7 @@ function showMenu() {
   mc.innerHTML = '';
   
   if (searchQuery) {
-    // SEARCH MODE
+    // Search mode - show only matching items
     let results = [];
     for (let sec of MENU) {
       for (let item of sec.items) {
@@ -452,57 +447,62 @@ function showMenu() {
       return;
     }
     
-    // Build search results HTML
-    let html = '<div style="padding:14px 18px 8px;font-family:Playfair Display,serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)">Search Results (' + results.length + ')</div>';
-    html += '<div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:8px;">';
+    // Show search results - SIMPLER INLINE HTML (no renderItem dependency)
+    let html = `<div style="padding:16px 18px;background:var(--cream);border-bottom:1px solid var(--border);font-family:Playfair Display,serif;font-size:18px;font-weight:600;color:var(--dark);">
+      Search Results (${results.length})
+    </div>`;
+    
+    html += '<div style="padding:10px;display:grid;grid-template-columns:1fr;gap:8px;">';
+    
     for (let item of results) {
-      html += renderItem(item);
+      // Simple inline card for search results
+      let priceText = item.price ? '₹' + item.price : (item.variants ? '₹' + item.variants[0].p : '₹0');
+      let badgesHtml = '';
+      
+      if (item.badges) {
+        if (item.badges.includes('nv')) badgesHtml += '<span style="background:#ffcccb;color:#c0392b;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;font-weight:600;">🔴 Non-Veg</span>';
+        if (item.badges.includes('veg')) badgesHtml += '<span style="background:#c8e6c9;color:#2e7d32;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;font-weight:600;">🟢 Veg</span>';
+        if (item.badges.includes('egg')) badgesHtml += '<span style="background:#fff9c4;color:#f57f17;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;font-weight:600;">🥚 Egg</span>';
+        if (item.badges.includes('pop')) badgesHtml += '<span style="background:#fff59d;color:#f57f17;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;font-weight:600;">⭐ Popular</span>';
+      }
+      
+      html += `
+        <div style="background:white;border:1px solid #e8ddc8;border-radius:10px;padding:12px;display:flex;gap:10px;">
+          <div style="flex:1;">
+            <div style="margin-bottom:4px;">${badgesHtml}</div>
+            <div style="font-weight:600;color:#2c1f0a;margin-bottom:2px;">${item.name}</div>
+            <div style="font-size:12px;color:#7a6a4f;margin-bottom:6px;">${item.desc || ''}</div>
+            <div style="color:#c8922a;font-weight:600;">${priceText}</div>
+          </div>
+          <button onclick="window._add(${item.id})" style="background:#c8922a;color:#1a1208;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:bold;">+</button>
+        </div>
+      `;
     }
+    
     html += '</div>';
     mc.innerHTML = html;
   } else {
-    // NORMAL MODE - Show all categories with items
-    
-    // Build category buttons in nav
+    // Normal mode - show categories
     for (let i = 0; i < MENU.length; i++) {
       let sec = MENU[i];
       let btn = document.createElement('button');
       btn.className = 'cat-btn' + (i === 0 ? ' active' : '');
       btn.textContent = sec.cat;
-      
-      // Scroll to category when clicked
-      btn.onclick = function(e) {
-        e.preventDefault();
+      btn.onclick = function() {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        
-        let catDiv = document.getElementById('cat-section-' + i);
-        if (catDiv) {
-          catDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
       };
-      
       nav.appendChild(btn);
-    }
-    
-    // Build all category sections with items
-    for (let i = 0; i < MENU.length; i++) {
-      let sec = MENU[i];
       
-      // Category header
-      let catHeader = document.createElement('div');
-      catHeader.id = 'cat-section-' + i;
-      catHeader.style.padding = '14px 18px 8px';
-      catHeader.style.fontFamily = 'Playfair Display, serif';
-      catHeader.style.fontSize = '18px';
-      catHeader.style.color = 'var(--dark)';
-      catHeader.style.background = 'var(--cream)';
-      catHeader.style.borderBottom = '1px solid var(--border)';
-      catHeader.style.scrollMarginTop = '60px';
-      catHeader.textContent = sec.cat;
-      mc.appendChild(catHeader);
+      let div = document.createElement('div');
+      div.style.padding = '14px 18px 8px';
+      div.style.fontFamily = 'Playfair Display, serif';
+      div.style.fontSize = '18px';
+      div.style.color = 'var(--dark)';
+      div.style.background = 'var(--cream)';
+      div.style.borderBottom = '1px solid var(--border)';
+      div.innerHTML = sec.cat;
       
-      // Category items grid
       let grid = document.createElement('div');
       grid.style.padding = '10px 14px';
       grid.style.display = 'grid';
@@ -514,6 +514,7 @@ function showMenu() {
         grid.innerHTML += (isEnabled ? renderItem(item) : renderDisabledItem(item));
       }
       
+      mc.appendChild(div);
       mc.appendChild(grid);
     }
   }
