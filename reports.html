@@ -201,8 +201,19 @@ function renderAll() {
     document.getElementById('s-'+s).textContent = orders.filter(o=>o.status===s).length;
   });
 
-  // Category revenue
-  const CATS = {Starters:[1,2,3,4,5],Biryani:[6,7,8,9],Curries:[10,11,12,13,14],Breads:[15,16,17,18],Beverages:[19,20,21,22],Desserts:[23,24,25]};
+  // Category revenue - updated menu structure
+  const CATS = {
+    Biryani: [1,2,3,4,5],
+    'Rice & Noodles': [6,7,8,9,10,11,12],
+    Starters: [13,14,15,16,17,18,19,20,56],
+    'Chicken Specials': [21,22,23,24,25,26,27,28],
+    Paneer: [29,30],
+    'Sea & Meat': [31,32,33],
+    Breads: [34],
+    Beverages: [35,36,37,38,39,40,41,42,43],
+    Smokes: [44,45,46,47,48,49,50,51],
+    Alcohol: [52,53,54,55]
+  };
   const catRev = {};
   served.forEach(o => { if (o.items) o.items.forEach(i => { const cat = Object.entries(CATS).find(([,ids])=>ids.includes(i.id))?.[0]||'Other'; catRev[cat]=(catRev[cat]||0)+(i.lineTotal||i.price*i.qty); }); });
   const catEntries = Object.entries(catRev).sort((a,b)=>b[1]-a[1]);
