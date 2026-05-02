@@ -54,7 +54,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .tbl-btn{padding:10px 4px;font-size:13px}
 }
 .menu-side{overflow-y:auto;border-right:1px solid var(--border)}
-.category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.search-bar{padding:12px 12px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.search-bar input{width:100%;border:1.5px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);color:var(--ink);transition:all 0.2s}
+.search-bar input:focus{border-color:var(--gold);background:var(--white)}
+.no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.category-nav{display:flex;gap:7px;padding:12px 16px;overflow-x:auto;background:var(--cream);border-bottom:1px solid var(--border);position:sticky;top:44px;z-index:5}
 .cat-btn{background:none;border:1.5px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.18s}
 .cat-btn.active,.cat-btn:hover{background:var(--gold);color:var(--dark);border-color:var(--gold)}
 .section-title{padding:14px 18px 8px;font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);background:var(--cream);border-bottom:1px solid var(--border)}
@@ -191,6 +195,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
   <div class="app-body">
     <div id="menu-view">
       <div class="menu-side">
+        <div class="search-bar">
+          <input type="text" id="search-input" placeholder="🔍 Search items..." onkeyup="searchItems(this.value)">
+        </div>
         <div class="category-nav" id="cat-nav"></div>
         <div id="menu-content"></div>
       </div>
@@ -329,9 +336,16 @@ const MENU = [
     { id:50, name:'Silk',              desc:'Cigarettes',                                 badges:['nv'],        price:22 },
     { id:51, name:'Advance',           desc:'Small cigarettes',                           badges:['nv'],        price:16 },
   ]},
+  { cat:'Alcohol 🍺', items:[
+    { id:52, name:'KF Lite',           desc:'Premium beer lite',                          badges:['nv'],        price:220 },
+    { id:53, name:'KF Strong',         desc:'Premium beer strong',                        badges:['nv'],        price:230 },
+    { id:54, name:'Tuburg Lite',       desc:'Tuburg beer lite',                           badges:['nv'],        price:220 },
+    { id:55, name:'Tuburg Strong',     desc:'Tuburg beer strong',                         badges:['nv'],        price:230 },
+    { id:56, name:'Omlet',             desc:'Alcohol drink',                              badges:['nv'],        price:20 },
+  ]},
 ];
 
-let cart = {}, tableNum = '', selV = {}, menuItemStates = {};
+let cart = {}, tableNum = '', selV = {}, menuItemStates = {}, searchQuery = '';
 
 // Load menu item enabled/disabled states from Firebase
 async function loadMenuItemStates() {
@@ -402,23 +416,52 @@ window.selectTable = async () => {
   buildMenu(); renderCart(); startLive();
 };
 
+function searchItems(query) {
+  searchQuery = query.toLowerCase();
+  buildMenu();
+}
+
 function buildMenu() {
   const nav = document.getElementById('cat-nav'); const mc = document.getElementById('menu-content');
   nav.innerHTML = ''; mc.innerHTML = '';
-  MENU.forEach((sec, i) => {
-    const hasAnyEnabled = sec.items.some(item => menuItemStates[String(item.id)] !== false);
-    if (!hasAnyEnabled) return; // Skip categories with all items disabled
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (i === 0 ? ' active' : ''); btn.textContent = sec.cat;
-    btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' }); };
-    nav.appendChild(btn);
-    const div = document.createElement('div'); div.id = 's' + sec.cat.replace(/\W/g, '');
-    div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${sec.items.map(item => {
-      const isEnabled = menuItemStates[String(item.id)] !== false;
-      return isEnabled ? renderItem(item) : renderDisabledItem(item);
-    }).join('')}</div>`;
+  
+  // If searching, show only matching items
+  if (searchQuery) {
+    const allItems = [];
+    MENU.forEach(sec => {
+      sec.items.forEach(item => {
+        if ((item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery)) &&
+            menuItemStates[String(item.id)] !== false) {
+          allItems.push(item);
+        }
+      });
+    });
+    
+    if (allItems.length === 0) {
+      mc.innerHTML = '<div class="no-results"><p>No items found matching "' + searchQuery + '"</p></div>';
+      return;
+    }
+    
+    const div = document.createElement('div');
+    div.innerHTML = `<div class="items-grid">${allItems.map(item => renderItem(item)).join('')}</div>`;
     mc.appendChild(div);
-  });
+  } else {
+    // Show categories normally
+    MENU.forEach((sec, i) => {
+      const hasAnyEnabled = sec.items.some(item => menuItemStates[String(item.id)] !== false);
+      if (!hasAnyEnabled) return;
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn' + (i === 0 ? ' active' : ''); btn.textContent = sec.cat;
+      btn.onclick = () => { document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('s' + sec.cat.replace(/\W/g, '')).scrollIntoView({ behavior: 'smooth' }); };
+      nav.appendChild(btn);
+      const div = document.createElement('div'); div.id = 's' + sec.cat.replace(/\W/g, '');
+      div.innerHTML = `<div class="section-title">${sec.cat}</div><div class="items-grid">${sec.items.map(item => {
+        const isEnabled = menuItemStates[String(item.id)] !== false;
+        return isEnabled ? renderItem(item) : renderDisabledItem(item);
+      }).join('')}</div>`;
+      mc.appendChild(div);
+    });
+  }
 }
 
 function bh(badges) {
