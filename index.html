@@ -292,6 +292,7 @@ const MENU = [
     { id:18, name:'Egg Manchurian',    desc:'Eggs in tangy Manchurian gravy',             badges:['egg'],       price:100 },
     { id:19, name:'Egg Keema',         desc:'Spiced minced egg masala',                   badges:['egg'],       price:100 },
     { id:20, name:'Corn Fry',          desc:'Crispy fried sweet corn',                    badges:['veg'],       price:120 },
+    { id:56, name:'Omlet',             desc:'Fluffy egg omlet',                           badges:['egg'],       price:20 },
   ]},
   { cat:'Chicken Specials 🍗', items:[
     { id:21, name:'Chicken Wings',     desc:'Spicy wings — 6 pieces',                     badges:['nv','pop'],  price:100 },
@@ -341,7 +342,6 @@ const MENU = [
     { id:53, name:'KF Strong',         desc:'Premium beer strong',                        badges:['nv'],        price:230 },
     { id:54, name:'Tuburg Lite',       desc:'Tuburg beer lite',                           badges:['nv'],        price:220 },
     { id:55, name:'Tuburg Strong',     desc:'Tuburg beer strong',                         badges:['nv'],        price:230 },
-    { id:56, name:'Omlet',             desc:'Alcohol drink',                              badges:['nv'],        price:20 },
   ]},
 ];
 
@@ -417,7 +417,7 @@ window.selectTable = async () => {
 };
 
 function searchItems(query) {
-  searchQuery = query.toLowerCase();
+  searchQuery = query.toLowerCase().trim();
   buildMenu();
 }
 
@@ -430,20 +430,20 @@ function buildMenu() {
     const allItems = [];
     MENU.forEach(sec => {
       sec.items.forEach(item => {
-        if ((item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery)) &&
-            menuItemStates[String(item.id)] !== false) {
+        const isEnabled = menuItemStates[String(item.id)] !== false; // defaults to true if not set
+        if ((item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery)) && isEnabled) {
           allItems.push(item);
         }
       });
     });
     
     if (allItems.length === 0) {
-      mc.innerHTML = '<div class="no-results"><p>No items found matching "' + searchQuery + '"</p></div>';
+      mc.innerHTML = '<div class="no-results"><p>No items found matching "<strong>' + searchQuery + '</strong>"</p></div>';
       return;
     }
     
-    const div = document.createElement('div');
-    div.innerHTML = `<div class="items-grid">${allItems.map(item => renderItem(item)).join('')}</div>`;
+    const div = document.createElement('div'); 
+    div.innerHTML = `<div class="section-title">Search Results (${allItems.length})</div><div class="items-grid">${allItems.map(item => renderItem(item)).join('')}</div>`;
     mc.appendChild(div);
   } else {
     // Show categories normally
