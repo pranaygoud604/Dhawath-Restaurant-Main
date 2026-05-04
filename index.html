@@ -404,7 +404,7 @@ window.selectTable = async () => {
   if (!tableNum) { alert('Please select or enter a table number.'); return; }
   document.getElementById('table-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
-  document.getElementById('table-badge').textContent = 'T' + tableNum;
+  document.getElementById('table-badge').textContent = tableNum;
   await loadMenuItemStates();
   showMenu(); renderCart(); startLive();
 };
@@ -634,7 +634,7 @@ window.loadMyOrders = async () => {
   el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">Loading...</div>';
   try {
     const snap = await getDocs(query(collection(db,'orders'), where('tableNumber','==', String(tableNum))));
-    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">No orders yet for T'+tableNum+'. Place your first order!</div>'; return; }
+    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">No orders yet for '+tableNum+'. Place your first order!</div>'; return; }
     const sMap = {pending:'s-pending',preparing:'s-preparing',ready:'s-ready',served:'s-served'};
     const now = Date.now();
     const docs = snap.docs.map(d => ({...d.data(), _id: d.id}));
