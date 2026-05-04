@@ -241,7 +241,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -404,7 +404,7 @@ window.selectTable = async () => {
   if (!tableNum) { alert('Please select or enter a table number.'); return; }
   document.getElementById('table-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
-  document.getElementById('table-badge').textContent = 'Table ' + tableNum;
+  document.getElementById('table-badge').textContent = 'T' + tableNum;
   await loadMenuItemStates();
   showMenu(); renderCart(); startLive();
 };
@@ -544,23 +544,61 @@ function updateCount() {
 }
 
 window.placeOrder = async () => {
-  const btn = document.getElementById('place-btn'); const lbl = document.getElementById('place-label');
-  btn.disabled = true; lbl.innerHTML = '<span class="spinner"></span> Saving...';
+  const btn = document.getElementById('place-btn'); 
+  const lbl = document.getElementById('place-label');
+  btn.disabled = true; 
+  lbl.innerHTML = '<span class="spinner"></span> Saving...';
   const sub = Object.values(cart).reduce((a, c) => a + c.linePrice * c.qty, 0);
-  const num = '#' + Math.floor(1000 + Math.random() * 9000);
+  const newItems = Object.values(cart).map(c => ({ id:c.id, name:c.name, qty:c.qty, variant:c.variant||null, price:c.linePrice, lineTotal:c.linePrice*c.qty }));
+  
   try {
-    await addDoc(collection(db, 'orders'), {
-      tableNumber: tableNum,
-      items: Object.values(cart).map(c => ({ id:c.id, name:c.name, qty:c.qty, variant:c.variant||null, price:c.linePrice, lineTotal:c.linePrice*c.qty })),
-      specialRequest: document.getElementById('special-req').value.trim(),
-      subtotal: sub, total: sub,
-      status: 'pending', orderNumber: num,
-      orderedAt: new Date().toISOString(), createdAt: serverTimestamp()
-    });
-  } catch (e) { alert('Failed: ' + e.message); btn.disabled = false; lbl.textContent = 'Place Order'; return; }
-  document.getElementById('order-num').textContent = num;
-  document.getElementById('modal').classList.add('open');
-  btn.disabled = false; lbl.textContent = 'Place Order';
+    // Check if there's an existing unpaid order for this table
+    const existingSnap = await getDocs(query(
+      collection(db, 'orders'), 
+      where('tableNumber', '==', String(tableNum)),
+      where('status', 'in', ['pending', 'preparing', 'ready', 'served'])
+    ));
+    
+    if (!existingSnap.empty) {
+      // Found an existing unpaid order - add items to it
+      const existingOrder = existingSnap.docs[0];
+      const existingData = existingOrder.data();
+      const mergedItems = [...(existingData.items || []), ...newItems];
+      const newTotal = existingData.total + sub;
+      
+      await updateDoc(doc(db, 'orders', existingOrder.id), {
+        items: mergedItems,
+        total: newTotal,
+        subtotal: (existingData.subtotal || existingData.total) + sub
+      });
+      
+      document.getElementById('order-num').textContent = existingData.orderNumber || '#' + existingOrder.id.slice(-4);
+    } else {
+      // No existing order - create a new one
+      const num = '#' + Math.floor(1000 + Math.random() * 9000);
+      await addDoc(collection(db, 'orders'), {
+        tableNumber: String(tableNum),
+        items: newItems,
+        specialRequest: document.getElementById('special-req').value.trim(),
+        subtotal: sub, 
+        total: sub,
+        status: 'pending', 
+        orderNumber: num,
+        orderedAt: new Date().toISOString(), 
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('order-num').textContent = num;
+    }
+    
+    document.getElementById('modal').classList.add('open');
+  } catch (e) { 
+    alert('Failed: ' + e.message); 
+    btn.disabled = false; 
+    lbl.textContent = 'Place Order'; 
+    return; 
+  }
+  btn.disabled = false; 
+  lbl.textContent = 'Place Order';
 };
 
 window.closeModal = () => { cart = {}; selV = {}; document.getElementById('modal').classList.remove('open'); document.getElementById('special-req').value = ''; refresh(); };
@@ -596,7 +634,7 @@ window.loadMyOrders = async () => {
   el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">Loading...</div>';
   try {
     const snap = await getDocs(query(collection(db,'orders'), where('tableNumber','==', String(tableNum))));
-    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">No orders yet for Table '+tableNum+'. Place your first order!</div>'; return; }
+    if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted)">No orders yet for T'+tableNum+'. Place your first order!</div>'; return; }
     const sMap = {pending:'s-pending',preparing:'s-preparing',ready:'s-ready',served:'s-served'};
     const now = Date.now();
     const docs = snap.docs.map(d => ({...d.data(), _id: d.id}));

@@ -390,7 +390,7 @@ window.loadTables = function() {
     const statusText = isReady ? '🔔 Food Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
     const div = document.createElement('div');
     div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">${i}</div><div class="table-status">${statusText}</div>`;
+    div.innerHTML = `<div class="table-num">T${i}</div><div class="table-status">${statusText}</div>`;
     grid.appendChild(div);
   }
 };
@@ -445,7 +445,7 @@ function renderCard(o, editable) {
   return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
     <div class="oc-top">
       <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
-      <span class="oc-table">Table ${o.tableNumber}</span>
+      <span class="oc-table">T${o.tableNumber}</span>
       <span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span>
     </div>
     ${itemRows}
