@@ -135,6 +135,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
   <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
   <div class="tab" onclick="showView('investments',this)">💰 Investments</div>
+  <div class="tab" onclick="showView('kitchen-invest',this)">🍗 Kitchen Invest</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
 </div>
 
@@ -256,6 +257,90 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
     <div style="padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-size:14px;font-weight:500">Investment History</div>
     <div id="inv-list" style="padding:16px"><div style="text-align:center;color:var(--muted);padding:20px">Loading...</div></div>
+  </div>
+</div>
+
+<!-- KITCHEN DAILY INVESTMENT -->
+<div class="view" id="view-kitchen-invest">
+  <div class="view-header">
+    <h2>🍗 Kitchen Daily Investment</h2>
+    <button class="refresh-btn" onclick="loadKitchenInvest()">↻ Refresh</button>
+  </div>
+
+  <!-- Quick Stats like Reports Page -->
+  <div class="stats-bar" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value" id="ki-today">₹0</div><div class="stat-sub" id="ki-today-items">0 items</div></div>
+    <div class="stat-card"><div class="stat-label">Yesterday</div><div class="stat-value" id="ki-yesterday">₹0</div><div class="stat-sub" id="ki-yesterday-items">0 items</div></div>
+    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="ki-week">₹0</div><div class="stat-sub" id="ki-week-items">0 items</div></div>
+    <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="ki-month">₹0</div><div class="stat-sub" id="ki-month-items">0 items</div></div>
+  </div>
+
+  <!-- Date Filter & Add Form -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <!-- Add Expense Form -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-family:'Playfair Display',serif;font-size:14px;color:var(--dark);margin-bottom:12px;font-weight:600">➕ Add Expense</div>
+      
+      <div style="margin-bottom:10px">
+        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Amount (₹)</label>
+        <input type="number" id="ki-amount" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)" min="0">
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Date</label>
+        <input type="date" id="ki-date" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Category</label>
+        <select id="ki-category" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
+          <option value="Chicken">🍗 Chicken</option>
+          <option value="Meat">🥩 Meat/Fish</option>
+          <option value="Vegetables">🥬 Vegetables</option>
+          <option value="Rice">🍚 Rice & Grains</option>
+          <option value="Oil">🛢️ Oil & Spices</option>
+          <option value="Gas">🔥 Gas</option>
+          <option value="Water">💧 Water</option>
+          <option value="Cool drinks">🥤 Cool Drinks</option>
+          <option value="Packaging">📦 Packaging</option>
+          <option value="Other">📌 Other</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Notes</label>
+        <input type="text" id="ki-notes" placeholder="Quantity/details..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
+      </div>
+
+      <button onclick="addKitchenInvest()" style="width:100%;background:var(--gold);color:var(--dark);border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Add</button>
+    </div>
+
+    <!-- Date Filter -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-family:'Playfair Display',serif;font-size:14px;color:var(--dark);margin-bottom:12px;font-weight:600">🔍 Filter by Date</div>
+      
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button onclick="filterKitchenInvest('today')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 Today</button>
+        <button onclick="filterKitchenInvest('yesterday')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 Yesterday</button>
+        <button onclick="filterKitchenInvest('week')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 This Week</button>
+        <button onclick="filterKitchenInvest('month')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 This Month</button>
+      </div>
+
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Custom Range</label>
+        <input type="date" id="ki-from" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;margin-bottom:6px;outline:none;color:var(--ink);background:var(--cream)">
+        <input type="date" id="ki-to" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;margin-bottom:6px;outline:none;color:var(--ink);background:var(--cream)">
+        <button onclick="filterKitchenInvest('range')" style="width:100%;padding:8px;background:var(--gold);color:var(--dark);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtered Results -->
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div style="padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-size:13px;font-weight:600">
+      📊 <span id="ki-filter-title">All Expenses</span> - Total: <span id="ki-filter-total">₹0</span>
+    </div>
+    <div id="ki-list" style="padding:16px;max-height:600px;overflow-y:auto"><div style="text-align:center;color:var(--muted);padding:20px">Loading...</div></div>
   </div>
 </div>
 
@@ -536,6 +621,7 @@ window.showView = function(view, el) {
   if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
   if (view === 'investments') loadInvestments();
+  if (view === 'kitchen-invest') loadKitchenInvest();
 };
 
 window.logout = async function() {
@@ -617,6 +703,170 @@ window.loadInvestments = async function() {
     document.getElementById('inv-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Error loading investments</div>';
   }
 };
+
+// Kitchen Daily Investment Management
+let allKitchenInvest = [];
+
+window.addKitchenInvest = async function() {
+  const amount = parseFloat(document.getElementById('ki-amount').value);
+  const date = document.getElementById('ki-date').value;
+  const category = document.getElementById('ki-category').value;
+  const notes = document.getElementById('ki-notes').value;
+
+  if (!amount || amount <= 0 || !date) {
+    alert('Please fill amount and date');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'kitchenInvestments'), {
+      amount: amount,
+      date: date,
+      category: category,
+      notes: notes || '',
+      createdAt: serverTimestamp()
+    });
+    
+    // Clear form
+    document.getElementById('ki-amount').value = '';
+    document.getElementById('ki-date').value = '';
+    document.getElementById('ki-notes').value = '';
+    document.getElementById('ki-category').value = 'Chicken';
+    
+    alert('Kitchen expense added successfully!');
+    loadKitchenInvest();
+  } catch (e) {
+    alert('Error adding expense: ' + e.message);
+  }
+};
+
+let allKitchenInvest = [];
+let kiCurrentFilter = 'all';
+
+window.loadKitchenInvest = async function() {
+  try {
+    const q = query(collection(db, 'kitchenInvestments'), orderBy('date', 'desc'));
+    const snap = await getDocs(q);
+    allKitchenInvest = snap.docs.map(d => ({...d.data(), _id: d.id}));
+    
+    // Calculate stats
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    const monthStartStr = monthStart.toISOString().split('T')[0];
+    
+    // Today
+    const todayData = allKitchenInvest.filter(i => i.date === today);
+    const todayTotal = todayData.reduce((a, i) => a + i.amount, 0);
+    document.getElementById('ki-today').textContent = '₹' + todayTotal.toLocaleString();
+    document.getElementById('ki-today-items').textContent = todayData.length + ' items';
+    
+    // Yesterday
+    const yesterdayData = allKitchenInvest.filter(i => i.date === yesterday);
+    const yesterdayTotal = yesterdayData.reduce((a, i) => a + i.amount, 0);
+    document.getElementById('ki-yesterday').textContent = '₹' + yesterdayTotal.toLocaleString();
+    document.getElementById('ki-yesterday-items').textContent = yesterdayData.length + ' items';
+    
+    // This Week
+    const weekData = allKitchenInvest.filter(i => i.date >= weekStartStr);
+    const weekTotal = weekData.reduce((a, i) => a + i.amount, 0);
+    document.getElementById('ki-week').textContent = '₹' + weekTotal.toLocaleString();
+    document.getElementById('ki-week-items').textContent = weekData.length + ' items';
+    
+    // This Month
+    const monthData = allKitchenInvest.filter(i => i.date >= monthStartStr);
+    const monthTotal = monthData.reduce((a, i) => a + i.amount, 0);
+    document.getElementById('ki-month').textContent = '₹' + monthTotal.toLocaleString();
+    document.getElementById('ki-month-items').textContent = monthData.length + ' items';
+    
+    // Display all by default
+    renderKitchenInvestList(allKitchenInvest, 'All Expenses');
+  } catch (e) {
+    console.error('Error loading kitchen expenses:', e);
+    document.getElementById('ki-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Error loading expenses</div>';
+  }
+};
+
+window.filterKitchenInvest = function(type) {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+  
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  const monthStartStr = monthStart.toISOString().split('T')[0];
+  
+  let filtered = [];
+  let title = '';
+  
+  switch(type) {
+    case 'today':
+      filtered = allKitchenInvest.filter(i => i.date === today);
+      title = 'Today\'s Expenses';
+      break;
+    case 'yesterday':
+      filtered = allKitchenInvest.filter(i => i.date === yesterday);
+      title = 'Yesterday\'s Expenses';
+      break;
+    case 'week':
+      filtered = allKitchenInvest.filter(i => i.date >= weekStartStr);
+      title = 'This Week\'s Expenses';
+      break;
+    case 'month':
+      filtered = allKitchenInvest.filter(i => i.date >= monthStartStr);
+      title = 'This Month\'s Expenses';
+      break;
+    case 'range':
+      const from = document.getElementById('ki-from').value;
+      const to = document.getElementById('ki-to').value;
+      if (!from || !to) {
+        alert('Please select both dates');
+        return;
+      }
+      filtered = allKitchenInvest.filter(i => i.date >= from && i.date <= to);
+      const fromDate = new Date(from).toLocaleDateString('en-IN');
+      const toDate = new Date(to).toLocaleDateString('en-IN');
+      title = `${fromDate} to ${toDate}`;
+      break;
+  }
+  
+  renderKitchenInvestList(filtered, title);
+};
+
+function renderKitchenInvestList(items, title) {
+  const catEmoji = {
+    Chicken:'🍗', Meat:'🥩', Vegetables:'🥬', Rice:'🍚', Oil:'🛢️', 
+    Gas:'🔥', Water:'💧', 'Cool drinks':'🥤', Packaging:'📦', Other:'📌'
+  };
+  
+  const total = items.reduce((a, i) => a + i.amount, 0);
+  document.getElementById('ki-filter-title').textContent = title;
+  document.getElementById('ki-filter-total').textContent = '₹' + total.toLocaleString();
+  
+  const html = items.length ? items.map(item => {
+    const itemDate = new Date(item.date).toLocaleDateString('en-IN');
+    const notesText = item.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:500">${item.notes}</div>` : '';
+    return `<div style="padding:12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">
+      <div style="flex:1">
+        <div style="font-weight:500;color:var(--dark);margin-bottom:2px">${catEmoji[item.category]||'📌'} ${item.category}</div>
+        <div style="font-size:11px;color:var(--muted)">${itemDate}</div>
+        ${notesText}
+      </div>
+      <div style="text-align:right;font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);font-weight:600;margin-left:16px">₹${item.amount.toLocaleString()}</div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No expenses found</div>';
+  
+  document.getElementById('ki-list').innerHTML = html;
+}
 
 // Check hash for direct kitchen link
 if (window.location.hash === '#kitchen') {
