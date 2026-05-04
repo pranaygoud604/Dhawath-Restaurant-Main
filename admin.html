@@ -79,6 +79,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .no-orders{text-align:center;padding:48px;color:var(--muted)}
 .no-orders .ni{font-size:40px;margin-bottom:12px}
 
+/* PENDING PAYMENTS SECTION */
+.section-divider{margin:32px 0 24px 0;padding-top:24px;border-top:2px solid var(--border)}
+.section-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-badge{font-size:12px;background:var(--gold);color:var(--dark);padding:2px 8px;border-radius:20px;font-weight:600;font-family:'DM Sans',sans-serif}
+
 /* MENU MANAGEMENT */
 .menu-section{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
 .menu-section-header{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:16px;display:flex;justify-content:space-between;align-items:center}
@@ -138,7 +143,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">—</div></div>
   <div class="stat-card"><div class="stat-label">Pending (Kitchen)</div><div class="stat-value" id="stat-pending">—</div></div>
   <div class="stat-card"><div class="stat-label">💳 Pending Payments</div><div class="stat-value" id="stat-pending-payment">—</div></div>
-  <div class="stat-card"><div class="stat-label">Tables Active</div><div class="stat-value" id="stat-tables">—</div></div>
 </div>
 
 <!-- KITCHEN VIEW -->
@@ -151,10 +155,22 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
         <button class="filter-btn" onclick="filterKitchen('pending',this)">Pending</button>
         <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
         <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
+        <button class="filter-btn" onclick="filterKitchen('served',this)">Served</button>
       </div>
     </div>
   </div>
+  
+  <!-- KITCHEN ORDERS -->
   <div class="orders-grid" id="kitchen-orders"><div class="no-orders"><div class="ni">👨‍🍳</div><p>Loading orders...</p></div></div>
+
+  <!-- PENDING PAYMENTS SECTION -->
+  <div class="section-divider">
+    <h3 class="section-title">
+      <span>💳 Pending Payments</span>
+      <span class="section-badge" id="payment-count">0</span>
+    </h3>
+  </div>
+  <div class="orders-grid" id="pending-payment-section"><div class="no-orders"><p>No pending payments 🎉</p></div></div>
 </div>
 
 <!-- ALL ORDERS -->
@@ -248,86 +264,97 @@ const MENU = [
     { id:30, name:'Paneer Curry',      desc:'Soft paneer in flavourful curry',            badges:['veg'],        price:160 },
   ]},
   { cat:'Sea & Meat 🐟', items:[
-    { id:31, name:'Fish Fry',          desc:'Crispy spiced fried fish',                   badges:['nv'],        price:120 },
-    { id:32, name:'Boti',              desc:'Tender mutton boti pieces',                  badges:['nv'],        price:150 },
-    { id:33, name:'Head Curry',        desc:'Spiced goat head curry',                     badges:['nv'],        price:180 },
+    { id:31, name:'Prawns Curry',      desc:'Succulent prawns in gravy',                  badges:['nv'],        price:280 },
+    { id:32, name:'Fish Curry',        desc:'Tender fish in spiced curry',                badges:['nv'],        price:240 },
+    { id:33, name:'Mutton Curry',      desc:'Slow-cooked mutton curry',                   badges:['nv'],        price:260 },
   ]},
-  { cat:'Breads 🫓', items:[
-    { id:34, name:'Chapathi',          desc:'Soft whole wheat flatbread — per piece',     badges:['veg'],        price:10 },
+  { cat:'Breads 🥖', items:[
+    { id:34, name:'Naan',              desc:'Soft Indian bread',                          badges:['veg'],       variants:[{l:'Plain',p:30},{l:'Butter',p:40},{l:'Garlic',p:50}] },
   ]},
   { cat:'Beverages 🥤', items:[
-    { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
-    { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
-    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
-    { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
-    { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
-    { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
-    { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
-    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
-    { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
+    { id:35, name:'Mango Lassi',       desc:'Creamy yogurt drink with mango',             badges:['veg'],       price:80 },
+    { id:36, name:'Sweet Lassi',       desc:'Traditional sweet yogurt drink',             badges:['veg'],       price:60 },
+    { id:37, name:'Masala Chai',       desc:'Aromatic spiced tea',                        badges:['veg'],       price:30 },
+    { id:38, name:'Coffee',            desc:'Freshly brewed coffee',                      badges:['veg'],       price:40 },
+    { id:39, name:'Cold Coffee',       desc:'Iced coffee drink',                          badges:['veg'],       price:60 },
+    { id:40, name:'Mango Shake',       desc:'Thick mango milkshake',                      badges:['veg'],       price:100 },
+    { id:41, name:'Banana Shake',      desc:'Creamy banana milkshake',                    badges:['veg'],       price:80 },
+    { id:42, name:'Buttermilk',        desc:'Traditional seasoned buttermilk',            badges:['veg'],       price:40 },
+    { id:43, name:'Lemonade',          desc:'Fresh lemon juice drink',                    badges:['veg'],       price:50 },
   ]},
   { cat:'Smokes 🚬', items:[
-    { id:44, name:'Kings',             desc:'Cigarettes',                                 badges:['nv'],        price:25 },
-    { id:45, name:'Lights',            desc:'Cigarettes',                                 badges:['nv'],        price:25 },
-    { id:46, name:'Gold Flak',         desc:'Small cigarettes',                           badges:['nv'],        price:15 },
-    { id:47, name:'Connects',          desc:'Cigarettes',                                 badges:['nv'],        price:22 },
-    { id:48, name:'Bistal',            desc:'Cigarettes',                                 badges:['nv'],        price:15 },
-    { id:49, name:'American Club',     desc:'Cigarettes',                                 badges:['nv'],        price:20 },
-    { id:50, name:'Silk',              desc:'Cigarettes',                                 badges:['nv'],        price:22 },
-    { id:51, name:'Advance',           desc:'Small cigarettes',                           badges:['nv'],        price:16 },
+    { id:44, name:'Cigarette',         desc:'Regular cigarettes',                         badges:[],            price:10 },
+    { id:45, name:'Beedi',             desc:'Traditional beedi',                          badges:[],            price:5 },
+    { id:46, name:'Pan',               desc:'Areca nut and betel leaf',                   badges:[],            price:15 },
+    { id:47, name:'Pan Masala',        desc:'Flavored areca nut mix',                     badges:[],            price:10 },
+    { id:48, name:'Gutkha',            desc:'Chewing tobacco product',                    badges:[],            price:20 },
+    { id:49, name:'Khaini',            desc:'Traditional tobacco preparation',            badges:[],            price:15 },
+    { id:50, name:'Zarda',             desc:'Sweetened tobacco product',                  badges:[],            price:25 },
+    { id:51, name:'Hookah',            desc:'Flavored water pipe tobacco',                badges:[],            variants:[{l:'Single',p:150},{l:'Double',p:250}] },
   ]},
   { cat:'Alcohol 🍺', items:[
-    { id:52, name:'KF Lite',           desc:'Premium beer lite',                          badges:['nv'],        price:220 },
-    { id:53, name:'KF Strong',         desc:'Premium beer strong',                        badges:['nv'],        price:230 },
-    { id:54, name:'Tuburg Lite',       desc:'Tuburg beer lite',                           badges:['nv'],        price:220 },
-    { id:55, name:'Tuburg Strong',     desc:'Tuburg beer strong',                         badges:['nv'],        price:230 },
+    { id:52, name:'Beer',              desc:'Assorted beers on tap',                      badges:[],            price:150 },
+    { id:53, name:'Wine',              desc:'Red or white wine selection',                badges:[],            price:200 },
+    { id:54, name:'Whiskey',           desc:'Premium whiskey pours',                      badges:[],            price:250 },
+    { id:55, name:'Cocktails',         desc:'House specialty cocktails',                  badges:[],            variants:[{l:'Single',p:200},{l:'Double',p:350}] },
   ]},
 ];
 
 let allOrders = [], kitchenFilter = 'all';
 
-// Auth check
+// Real-time listener for orders
 onAuthStateChanged(auth, user => {
   if (!user) window.location.href = 'login.html';
-  else { startLive(); loadTables(); buildMenuMgmt(); }
+  else {
+    const today = new Date().toDateString();
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    onSnapshot(q, (snap) => {
+      allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+      updateStats();
+      renderKitchen();
+    });
+    buildMenuMgmt();
+  }
 });
-
-// Live kitchen listener
-function startLive() {
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-  onSnapshot(q, snap => {
-    allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
-    renderKitchen();
-    updateStats();
-    // Also update pending orders view if it's currently active
-    if (document.getElementById('view-pending-orders').classList.contains('active')) {
-      loadPendingOrders();
-    }
-  });
-}
-
-function renderKitchen() {
-  const el = document.getElementById('kitchen-orders');
-  const filtered = kitchenFilter === 'all'
-    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid' && o.status !== 'pending-payment')
-    : allOrders.filter(o => o.status === kitchenFilter);
-  if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
-  el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
-}
 
 function updateStats() {
   const today = new Date().toDateString();
-  const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
+  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
   const paidOrders = todayOrders.filter(o => o.status === 'paid');
+  const pending = todayOrders.filter(o => o.status === 'pending');
+  const pendingPayment = todayOrders.filter(o => o.status === 'pending-payment');
+  const served = todayOrders.filter(o => o.status !== 'cancelled');
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
-  const pending = allOrders.filter(o => o.status === 'pending').length;
-  const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
-  const tables = [...new Set(allOrders.filter(o => o.status !== 'served').map(o => o.tableNumber))].length;
+
   document.getElementById('stat-orders').textContent = todayOrders.length;
   document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
-  document.getElementById('stat-pending').textContent = pending;
-  document.getElementById('stat-pending-payment').textContent = pendingPayment;
-  document.getElementById('stat-tables').textContent = tables;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-pending-payment').textContent = pendingPayment.length;
+}
+
+function renderKitchen() {
+  const today = new Date().toDateString();
+  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  
+  // Kitchen orders: pending, preparing, ready, served
+  const kitchenOrders = todayOrders.filter(o => ['pending', 'preparing', 'ready', 'served'].includes(o.status));
+  let filtered = kitchenOrders;
+  if (kitchenFilter !== 'all') {
+    filtered = kitchenOrders.filter(o => o.status === kitchenFilter);
+  }
+  
+  // Pending payment orders: pending-payment, paid
+  const paymentOrders = todayOrders.filter(o => ['pending-payment', 'paid'].includes(o.status));
+  
+  document.getElementById('kitchen-orders').innerHTML = filtered.length ? 
+    filtered.map(o => renderCard(o, true)).join('') : 
+    '<div class="no-orders" style="grid-column:1/-1"><div class="ni">👨‍🍳</div><p>No orders in this category</p></div>';
+  
+  // Update payment section
+  document.getElementById('payment-count').textContent = paymentOrders.length;
+  document.getElementById('pending-payment-section').innerHTML = paymentOrders.length ?
+    paymentOrders.map(o => renderCard(o, true)).join('') :
+    '<div class="no-orders" style="grid-column:1/-1"><p>No pending payments 🎉</p></div>';
 }
 
 window.loadAllOrders = async function() {
@@ -341,7 +368,9 @@ window.loadAllOrders = async function() {
 
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
-  const pending = allOrders.filter(o => o.status === 'pending-payment');
+  const today = new Date().toDateString();
+  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  const pending = todayOrders.filter(o => o.status === 'pending-payment');
   if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
@@ -349,8 +378,10 @@ window.loadPendingOrders = function() {
 window.loadTables = function() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
-  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
-  const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
+  const today = new Date().toDateString();
+  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  const occupiedTables = [...new Set(todayOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
+  const readyTables = [...new Set(todayOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
   for (let i = 1; i <= 16; i++) {
     const t = String(i);
     const isReady = readyTables.includes(t);
@@ -365,7 +396,6 @@ window.loadTables = function() {
 };
 
 async function buildMenuMgmt() {
-  // Load menu item states from Firebase
   let menuStates = {};
   try {
     const snap = await getDocs(collection(db, 'menuItems'));
