@@ -365,8 +365,8 @@ grid.appendChild(indoorLabel);
 for (let i = 1; i <= 12; i++) {
   const b = document.createElement('button');
   b.className = 'tbl-btn';
-  b.textContent = 'I' + i;
-  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = 'I' + i; };
+  b.textContent = 'T' + i;
+  b.onclick = () => { document.querySelectorAll('.tbl-btn').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); document.getElementById('custom-table').value = ''; tableNum = 'T' + i; };
   grid.appendChild(b);
 }
 
