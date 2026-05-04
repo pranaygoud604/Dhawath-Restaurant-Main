@@ -87,10 +87,10 @@ tr:last-child td{border:none}
 
   <!-- SUMMARY STATS -->
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="r-revenue">₹0</div><div class="stat-sub" id="r-revenue-sub">Loading...</div></div>
-    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="r-orders">0</div><div class="stat-sub" id="r-orders-sub">Loading...</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Order Value</div><div class="stat-value" id="r-avg">₹0</div><div class="stat-sub">per order</div></div>
-    <div class="stat-card"><div class="stat-label">Items Sold</div><div class="stat-value" id="r-items">0</div><div class="stat-sub">total qty</div></div>
+    <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="r-revenue">₹0</div><div class="stat-sub" id="r-revenue-sub">all orders</div></div>
+    <div class="stat-card"><div class="stat-label">🪑 Table Revenue</div><div class="stat-value" id="r-table-revenue">₹0</div><div class="stat-sub">indoor only</div></div>
+    <div class="stat-card"><div class="stat-label">📦 Parcel Revenue</div><div class="stat-value" id="r-parcel-revenue">₹0</div><div class="stat-sub">parcels only</div></div>
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="r-orders">0</div><div class="stat-sub" id="r-orders-sub">completed</div></div>
   </div>
 
   <!-- STATUS BREAKDOWN -->
@@ -188,14 +188,19 @@ function renderAll() {
   const paidOrders = orders.filter(o => o.status === 'paid');
   const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
   const totalItems = served.reduce((a, o) => a + (o.items ? o.items.reduce((b, i) => b + i.qty, 0) : 0), 0);
-  const avg = paidOrders.length ? Math.round(revenue / paidOrders.length) : 0;
+
+  // Calculate table vs parcel revenue
+  const tableOrders = served.filter(o => o.tableNumber && o.tableNumber.match(/^[0-9]/));
+  const parcelOrders = served.filter(o => o.tableNumber && o.tableNumber.startsWith('P'));
+  
+  const tableRevenue = tableOrders.filter(o => o.status === 'paid').reduce((a, o) => a + (o.total || 0), 0);
+  const parcelRevenue = parcelOrders.filter(o => o.status === 'paid').reduce((a, o) => a + (o.total || 0), 0);
 
   document.getElementById('r-revenue').textContent = '₹' + revenue.toLocaleString();
+  document.getElementById('r-table-revenue').textContent = '₹' + tableRevenue.toLocaleString();
+  document.getElementById('r-parcel-revenue').textContent = '₹' + parcelRevenue.toLocaleString();
   document.getElementById('r-orders').textContent = orders.length;
-  document.getElementById('r-avg').textContent = '₹' + avg;
-  document.getElementById('r-items').textContent = totalItems;
-  document.getElementById('r-revenue-sub').textContent = served.length + ' completed orders';
-  document.getElementById('r-orders-sub').textContent = orders.filter(o=>o.status==='cancelled').length + ' cancelled';
+  document.getElementById('r-orders-sub').textContent = paidOrders.length + ' paid';
 
   ['pending','preparing','ready','served','cancelled'].forEach(s => {
     document.getElementById('s-'+s).textContent = orders.filter(o=>o.status===s).length;
@@ -238,7 +243,7 @@ function renderAll() {
   ).join('');
   document.getElementById('parcel-items').innerHTML = parcelRows || '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">No parcel orders</td></tr>';
 
-  // Table orders separately
+  // Table orders separately - showing T format
   const tableMap = {};
   served.forEach(o => {
     const t = o.tableNumber || '?';
@@ -249,18 +254,28 @@ function renderAll() {
   });
   const tableRows = Object.entries(tableMap).sort((a,b)=>b[1].rev-a[1].rev).map(([t,d]) => {
     const avg = d.orders ? Math.round(d.rev/d.orders) : 0;
-    return `<tr><td><strong>Table ${t}</strong></td><td>${d.orders}</td><td>${d.items}</td><td>₹${d.rev.toLocaleString()}</td><td>₹${avg}</td></tr>`;
+    return `<tr><td><strong>T${t}</strong></td><td>${d.orders}</td><td>${d.items}</td><td>₹${d.rev.toLocaleString()}</td><td>₹${avg}</td></tr>`;
   }).join('');
   document.getElementById('table-orders').innerHTML = tableRows || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">No data</td></tr>';
 
-  // Recent orders
-  const sMap = {pending:'#854F0B',preparing:'#185FA5',ready:'#2D7A4F',served:'#5F5E5A',cancelled:'#A32D2D'};
-  const recentRows = orders.slice(0,20).map(o => {
+  // Recent orders - sorted by latest PAID orders first
+  const sMap = {pending:'#854F0B',preparing:'#185FA5',ready:'#2D7A4F',served:'#5F5E5A',cancelled:'#A32D2D',paid:'#155724'};
+  
+  // Sort orders: paid first (newest), then by time
+  const sortedOrders = [...orders].sort((a, b) => {
+    if (a.status === 'paid' && b.status !== 'paid') return -1;
+    if (a.status !== 'paid' && b.status === 'paid') return 1;
+    const timeA = a.orderedAt ? new Date(a.orderedAt).getTime() : 0;
+    const timeB = b.orderedAt ? new Date(b.orderedAt).getTime() : 0;
+    return timeB - timeA;
+  });
+  
+  const recentRows = sortedOrders.slice(0,20).map(o => {
     const time = o.orderedAt ? new Date(o.orderedAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '—';
     const items = o.items ? o.items.map(i=>i.name+'×'+i.qty).join(', ') : '—';
     return `<tr>
       <td class="td-num">${o.orderNumber||'#'+o._id.slice(-4)}</td>
-      <td>Table ${o.tableNumber}</td>
+      <td>T${o.tableNumber}</td>
       <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${items}</td>
       <td><strong>₹${o.total||0}</strong></td>
       <td><span style="color:${sMap[o.status]||'#854F0B'};font-weight:500">${o.status||'pending'}</span></td>
