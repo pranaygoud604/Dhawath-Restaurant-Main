@@ -507,6 +507,23 @@ window.loadAllOrders = async function() {
   el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
 };
 
+window.loadKitchen = function() {
+  renderKitchen();
+};
+
+window.loadMenuMgmt = function() {
+  const el = document.getElementById('menu-list');
+  el.innerHTML = MENU.map(section => `
+    <div class="menu-section">
+      <div class="menu-section-header">${section.cat}</div>
+      ${section.items.map(item => `
+        <div class="menu-item-row">
+          <div class="mi-info"><div class="mi-name">${item.name}</div><div class="mi-price">₹${item.price || (item.variants ? item.variants[0].p : 'N/A')}</div></div>
+          <label class="mi-toggle"><input type="checkbox" ${menuStates[item.id] !== false ? 'checked' : ''} onchange="toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
+        </div>`).join('')}
+    </div>`).join('');
+};
+
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
   const today = new Date().toDateString();
@@ -617,9 +634,11 @@ window.showView = function(view, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   el.classList.add('active');
+  if (view === 'kitchen') loadKitchen();
   if (view === 'all-orders') loadAllOrders();
   if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
+  if (view === 'menu-mgmt') loadMenuMgmt();
   if (view === 'investments') loadInvestments();
   if (view === 'kitchen-invest') loadKitchenInvest();
 };
