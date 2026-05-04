@@ -343,8 +343,8 @@ function renderKitchen() {
     filtered = kitchenOrders.filter(o => o.status === kitchenFilter);
   }
   
-  // Pending payment orders: pending-payment, paid
-  const paymentOrders = todayOrders.filter(o => ['pending-payment', 'paid'].includes(o.status));
+  // Pending payment orders: ONLY pending-payment (not paid)
+  const paymentOrders = todayOrders.filter(o => o.status === 'pending-payment');
   
   document.getElementById('kitchen-orders').innerHTML = filtered.length ? 
     filtered.map(o => renderCard(o, true)).join('') : 

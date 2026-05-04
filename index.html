@@ -552,11 +552,11 @@ window.placeOrder = async () => {
   const newItems = Object.values(cart).map(c => ({ id:c.id, name:c.name, qty:c.qty, variant:c.variant||null, price:c.linePrice, lineTotal:c.linePrice*c.qty }));
   
   try {
-    // Check if there's an existing unpaid order for this table
+    // Check if there's an existing unpaid order for this table (includes pending-payment status)
     const existingSnap = await getDocs(query(
       collection(db, 'orders'), 
       where('tableNumber', '==', String(tableNum)),
-      where('status', 'in', ['pending', 'preparing', 'ready', 'served'])
+      where('status', 'in', ['pending', 'preparing', 'ready', 'served', 'pending-payment'])
     ));
     
     if (!existingSnap.empty) {
