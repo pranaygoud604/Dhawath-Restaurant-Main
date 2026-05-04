@@ -134,6 +134,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="tab" onclick="showView('pending-orders',this)">💳 Pending Payments</div>
   <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
   <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
+  <div class="tab" onclick="showView('investments',this)">💰 Investments</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
 </div>
 
@@ -203,10 +204,65 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div id="menu-list"></div>
 </div>
 
+<!-- INVESTMENTS -->
+<div class="view" id="view-investments">
+  <div class="view-header">
+    <h2>💰 Investments</h2>
+    <button class="refresh-btn" onclick="loadInvestments()">↻ Refresh</button>
+  </div>
+
+  <!-- Investment Stats -->
+  <div class="stats-bar" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-label">Total Investments</div><div class="stat-value" id="inv-total">₹0</div><div class="stat-sub" id="inv-count">0 entries</div></div>
+    <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="inv-month">₹0</div><div class="stat-sub">current month</div></div>
+  </div>
+
+  <!-- Add Investment Form -->
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--dark);margin-bottom:16px;font-weight:600">Add New Investment</div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Amount (₹)</label>
+        <input type="number" id="inv-amount" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)" min="0">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Date</label>
+        <input type="date" id="inv-date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Description</label>
+      <input type="text" id="inv-desc" placeholder="e.g. Kitchen equipment, Furniture, Repairs..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Category</label>
+      <select id="inv-category" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
+        <option value="Equipment">🔧 Equipment</option>
+        <option value="Furniture">🪑 Furniture</option>
+        <option value="Repairs">🔨 Repairs & Maintenance</option>
+        <option value="Renovation">🏗️ Renovation</option>
+        <option value="Technology">💻 Technology</option>
+        <option value="Other">📌 Other</option>
+      </select>
+    </div>
+
+    <button onclick="addInvestment()" style="width:100%;background:var(--gold);color:var(--dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Add Investment</button>
+  </div>
+
+  <!-- Investment List -->
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div style="padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-size:14px;font-weight:500">Investment History</div>
+    <div id="inv-list" style="padding:16px"><div style="text-align:center;color:var(--muted);padding:20px">Loading...</div></div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -230,13 +286,13 @@ const MENU = [
     { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
   ]},
   { cat:'Rice & Noodles 🍜', items:[
-    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
-    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
-    { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
-    { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
-    { id:10, name:'Egg Noodles',       desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
-    { id:11, name:'Chicken Noodles',   desc:'Stir-fried noodles with chicken',            badges:['nv'],        price:90 },
-    { id:12, name:'Veg Noodles',       desc:'Stir-fried noodles with vegetables',         badges:['veg'],       price:60 },
+    { id:6,  name:'Chicken Fried Rice',  desc:'Fried rice with chicken',                    badges:['nv'],        variants:[{l:'Normal',p:90},{l:'Double Egg',p:100}] },
+    { id:7,  name:'Egg Fried Rice',      desc:'Fried rice with scrambled eggs',             badges:['egg'],       variants:[{l:'Normal',p:70},{l:'Double Egg',p:80}] },
+    { id:8,  name:'Veg Rice',            desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
+    { id:9,  name:'Geera Rice',          desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
+    { id:10, name:'Egg Noodles',         desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
+    { id:11, name:'Chicken Noodles',     desc:'Stir-fried noodles with chicken',            badges:['nv'],        price:90 },
+    { id:12, name:'Veg Noodles',         desc:'Stir-fried noodles with vegetables',         badges:['veg'],       price:60 },
   ]},
   { cat:'Starters 🔥', items:[
     { id:13, name:'Chicken Manchuria', desc:'Crispy chicken in spicy Manchurian sauce',   badges:['nv','pop'],  price:150 },
@@ -247,7 +303,7 @@ const MENU = [
     { id:18, name:'Egg Manchurian',    desc:'Eggs in tangy Manchurian gravy',             badges:['egg'],       price:100 },
     { id:19, name:'Egg Keema',         desc:'Spiced minced egg masala',                   badges:['egg'],       price:100 },
     { id:20, name:'Corn Fry',          desc:'Crispy fried sweet corn',                    badges:['veg'],       price:120 },
-    { id:56, name:'Omlet',             desc:'Fluffy egg omlet',                           badges:['egg'],       price:20 },
+    { id:56, name:'Omelette',          desc:'Fluffy egg omelette',                        badges:['egg'],       price:20 },
   ]},
   { cat:'Chicken Specials 🍗', items:[
     { id:21, name:'Chicken Wings',     desc:'Spicy wings — 6 pieces',                     badges:['nv','pop'],  price:100 },
@@ -286,11 +342,11 @@ const MENU = [
     { id:44, name:'Cigarette',         desc:'Regular cigarettes',                         badges:[],            price:10 },
     { id:45, name:'Beedi',             desc:'Traditional beedi',                          badges:[],            price:5 },
     { id:46, name:'Pan',               desc:'Areca nut and betel leaf',                   badges:[],            price:15 },
-    { id:47, name:'Pan Masala',        desc:'Flavored areca nut mix',                     badges:[],            price:10 },
+    { id:47, name:'Pan Masala',        desc:'Flavoured areca nut mix',                    badges:[],            price:10 },
     { id:48, name:'Gutkha',            desc:'Chewing tobacco product',                    badges:[],            price:20 },
     { id:49, name:'Khaini',            desc:'Traditional tobacco preparation',            badges:[],            price:15 },
     { id:50, name:'Zarda',             desc:'Sweetened tobacco product',                  badges:[],            price:25 },
-    { id:51, name:'Hookah',            desc:'Flavored water pipe tobacco',                badges:[],            variants:[{l:'Single',p:150},{l:'Double',p:250}] },
+    { id:51, name:'Hookah',            desc:'Flavoured water pipe tobacco',               badges:[],            variants:[{l:'Single',p:150},{l:'Double',p:250}] },
   ]},
   { cat:'Alcohol 🍺', items:[
     { id:52, name:'Beer',              desc:'Assorted beers on tap',                      badges:[],            price:150 },
@@ -479,11 +535,87 @@ window.showView = function(view, el) {
   if (view === 'all-orders') loadAllOrders();
   if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
+  if (view === 'investments') loadInvestments();
 };
 
 window.logout = async function() {
   await signOut(auth);
   window.location.href = 'login.html';
+};
+
+// Investment Management
+let allInvestments = [];
+
+window.addInvestment = async function() {
+  const amount = parseFloat(document.getElementById('inv-amount').value);
+  const date = document.getElementById('inv-date').value;
+  const desc = document.getElementById('inv-desc').value;
+  const category = document.getElementById('inv-category').value;
+
+  if (!amount || amount <= 0 || !date || !desc) {
+    alert('Please fill all fields with valid data');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'investments'), {
+      amount: amount,
+      date: date,
+      description: desc,
+      category: category,
+      createdAt: serverTimestamp()
+    });
+    
+    // Clear form
+    document.getElementById('inv-amount').value = '';
+    document.getElementById('inv-date').value = '';
+    document.getElementById('inv-desc').value = '';
+    document.getElementById('inv-category').value = 'Equipment';
+    
+    alert('Investment added successfully!');
+    loadInvestments();
+  } catch (e) {
+    alert('Error adding investment: ' + e.message);
+  }
+};
+
+window.loadInvestments = async function() {
+  try {
+    const q = query(collection(db, 'investments'), orderBy('date', 'desc'));
+    const snap = await getDocs(q);
+    allInvestments = snap.docs.map(d => ({...d.data(), _id: d.id}));
+    
+    // Calculate totals
+    const total = allInvestments.reduce((a, i) => a + i.amount, 0);
+    const today = new Date();
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const thisMonth = allInvestments
+      .filter(i => new Date(i.date) >= monthStart)
+      .reduce((a, i) => a + i.amount, 0);
+    
+    document.getElementById('inv-total').textContent = '₹' + total.toLocaleString();
+    document.getElementById('inv-count').textContent = allInvestments.length + ' entries';
+    document.getElementById('inv-month').textContent = '₹' + thisMonth.toLocaleString();
+    
+    // Render list
+    const catEmoji = {Equipment:'🔧', Furniture:'🪑', 'Repairs & Maintenance':'🔨', Renovation:'🏗️', Technology:'💻', Other:'📌'};
+    const html = allInvestments.length ? allInvestments.map(inv => {
+      const invDate = new Date(inv.date).toLocaleDateString('en-IN');
+      return `<div style="padding:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="flex:1">
+          <div style="font-weight:500;color:var(--dark);margin-bottom:4px">${catEmoji[inv.category]||'📌'} ${inv.category}</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${inv.description}</div>
+          <div style="font-size:11px;color:var(--muted)">${invDate}</div>
+        </div>
+        <div style="text-align:right;font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);font-weight:600;margin-left:16px">₹${inv.amount.toLocaleString()}</div>
+      </div>`;
+    }).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No investments recorded yet</div>';
+    
+    document.getElementById('inv-list').innerHTML = html;
+  } catch (e) {
+    console.error('Error loading investments:', e);
+    document.getElementById('inv-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Error loading investments</div>';
+  }
 };
 
 // Check hash for direct kitchen link
