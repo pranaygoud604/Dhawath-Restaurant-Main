@@ -501,7 +501,7 @@ function renderCard(o, editable) {
   return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
     <div class="oc-top">
       <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
-      <span class="oc-table">T${o.tableNumber}</span>
+      <span class="oc-table">${o.tableNumber}</span>
       <span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span>
     </div>
     ${itemRows}
