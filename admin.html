@@ -24,8 +24,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .logout-btn:hover{background:rgba(200,146,42,0.1)}
 
 /* TABS */
-.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:90;overflow-x:auto}
-.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s}
+.tabs{display:flex;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:90;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.tab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;flex-shrink:0}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 
 /* STATS */
@@ -79,11 +79,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .no-orders{text-align:center;padding:48px;color:var(--muted)}
 .no-orders .ni{font-size:40px;margin-bottom:12px}
 
-/* PENDING PAYMENTS SECTION */
-.section-divider{margin:32px 0 24px 0;padding-top:24px;border-top:2px solid var(--border)}
-.section-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.section-badge{font-size:12px;background:var(--gold);color:var(--dark);padding:2px 8px;border-radius:20px;font-weight:600;font-family:'DM Sans',sans-serif}
-
 /* MENU MANAGEMENT */
 .menu-section{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden}
 .menu-section-header{padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:16px;display:flex;justify-content:space-between;align-items:center}
@@ -134,8 +129,6 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div class="tab" onclick="showView('pending-orders',this)">💳 Pending Payments</div>
   <div class="tab" onclick="showView('tables',this)">🪑 Tables</div>
   <div class="tab" onclick="showView('menu-mgmt',this)">📜 Menu</div>
-  <div class="tab" onclick="showView('investments',this)">💰 Investments</div>
-  <div class="tab" onclick="showView('kitchen-invest',this)">🍗 Kitchen Invest</div>
   <div class="tab" onclick="window.location.href='reports.html'">📊 Reports</div>
 </div>
 
@@ -158,21 +151,11 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
         <button class="filter-btn" onclick="filterKitchen('preparing',this)">Preparing</button>
         <button class="filter-btn" onclick="filterKitchen('ready',this)">Ready</button>
         <button class="filter-btn" onclick="filterKitchen('served',this)">Served</button>
+        <button class="filter-btn" onclick="filterKitchen('pending-payment',this)">💳 Unpaid</button>
       </div>
     </div>
   </div>
-  
-  <!-- KITCHEN ORDERS -->
   <div class="orders-grid" id="kitchen-orders"><div class="no-orders"><div class="ni">👨‍🍳</div><p>Loading orders...</p></div></div>
-
-  <!-- PENDING PAYMENTS SECTION -->
-  <div class="section-divider">
-    <h3 class="section-title">
-      <span>💳 Pending Payments</span>
-      <span class="section-badge" id="payment-count">0</span>
-    </h3>
-  </div>
-  <div class="orders-grid" id="pending-payment-section"><div class="no-orders"><p>No pending payments 🎉</p></div></div>
 </div>
 
 <!-- ALL ORDERS -->
@@ -205,149 +188,10 @@ input:checked+.toggle-slider:before{transform:translateX(18px)}
   <div id="menu-list"></div>
 </div>
 
-<!-- INVESTMENTS -->
-<div class="view" id="view-investments">
-  <div class="view-header">
-    <h2>💰 Investments</h2>
-    <button class="refresh-btn" onclick="loadInvestments()">↻ Refresh</button>
-  </div>
-
-  <!-- Investment Stats -->
-  <div class="stats-bar" style="margin-bottom:20px">
-    <div class="stat-card"><div class="stat-label">Total Investments</div><div class="stat-value" id="inv-total">₹0</div><div class="stat-sub" id="inv-count">0 entries</div></div>
-    <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="inv-month">₹0</div><div class="stat-sub">current month</div></div>
-  </div>
-
-  <!-- Add Investment Form -->
-  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
-    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--dark);margin-bottom:16px;font-weight:600">Add New Investment</div>
-    
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Amount (₹)</label>
-        <input type="number" id="inv-amount" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)" min="0">
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Date</label>
-        <input type="date" id="inv-date" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
-      </div>
-    </div>
-
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Description</label>
-      <input type="text" id="inv-desc" placeholder="e.g. Kitchen equipment, Furniture, Repairs..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
-    </div>
-
-    <div style="margin-bottom:12px">
-      <label style="font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:5px;text-transform:uppercase">Category</label>
-      <select id="inv-category" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;color:var(--ink);background:var(--cream)">
-        <option value="Equipment">🔧 Equipment</option>
-        <option value="Furniture">🪑 Furniture</option>
-        <option value="Repairs">🔨 Repairs & Maintenance</option>
-        <option value="Renovation">🏗️ Renovation</option>
-        <option value="Technology">💻 Technology</option>
-        <option value="Other">📌 Other</option>
-      </select>
-    </div>
-
-    <button onclick="addInvestment()" style="width:100%;background:var(--gold);color:var(--dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Add Investment</button>
-  </div>
-
-  <!-- Investment List -->
-  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-    <div style="padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-size:14px;font-weight:500">Investment History</div>
-    <div id="inv-list" style="padding:16px"><div style="text-align:center;color:var(--muted);padding:20px">Loading...</div></div>
-  </div>
-</div>
-
-<!-- KITCHEN DAILY INVESTMENT -->
-<div class="view" id="view-kitchen-invest">
-  <div class="view-header">
-    <h2>🍗 Kitchen Daily Investment</h2>
-    <button class="refresh-btn" onclick="loadKitchenInvest()">↻ Refresh</button>
-  </div>
-
-  <!-- Quick Stats like Reports Page -->
-  <div class="stats-bar" style="margin-bottom:20px">
-    <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value" id="ki-today">₹0</div><div class="stat-sub" id="ki-today-items">0 items</div></div>
-    <div class="stat-card"><div class="stat-label">Yesterday</div><div class="stat-value" id="ki-yesterday">₹0</div><div class="stat-sub" id="ki-yesterday-items">0 items</div></div>
-    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="ki-week">₹0</div><div class="stat-sub" id="ki-week-items">0 items</div></div>
-    <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="ki-month">₹0</div><div class="stat-sub" id="ki-month-items">0 items</div></div>
-  </div>
-
-  <!-- Date Filter & Add Form -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-    <!-- Add Expense Form -->
-    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-family:'Playfair Display',serif;font-size:14px;color:var(--dark);margin-bottom:12px;font-weight:600">➕ Add Expense</div>
-      
-      <div style="margin-bottom:10px">
-        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Amount (₹)</label>
-        <input type="number" id="ki-amount" placeholder="0" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)" min="0">
-      </div>
-
-      <div style="margin-bottom:10px">
-        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Date</label>
-        <input type="date" id="ki-date" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
-      </div>
-
-      <div style="margin-bottom:10px">
-        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Category</label>
-        <select id="ki-category" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
-          <option value="Chicken">🍗 Chicken</option>
-          <option value="Meat">🥩 Meat/Fish</option>
-          <option value="Vegetables">🥬 Vegetables</option>
-          <option value="Rice">🍚 Rice & Grains</option>
-          <option value="Oil">🛢️ Oil & Spices</option>
-          <option value="Gas">🔥 Gas</option>
-          <option value="Water">💧 Water</option>
-          <option value="Cool drinks">🥤 Cool Drinks</option>
-          <option value="Packaging">📦 Packaging</option>
-          <option value="Other">📌 Other</option>
-        </select>
-      </div>
-
-      <div style="margin-bottom:10px">
-        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Notes</label>
-        <input type="text" id="ki-notes" placeholder="Quantity/details..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:13px;outline:none;color:var(--ink);background:var(--cream)">
-      </div>
-
-      <button onclick="addKitchenInvest()" style="width:100%;background:var(--gold);color:var(--dark);border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Add</button>
-    </div>
-
-    <!-- Date Filter -->
-    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px">
-      <div style="font-family:'Playfair Display',serif;font-size:14px;color:var(--dark);margin-bottom:12px;font-weight:600">🔍 Filter by Date</div>
-      
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="filterKitchenInvest('today')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 Today</button>
-        <button onclick="filterKitchenInvest('yesterday')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 Yesterday</button>
-        <button onclick="filterKitchenInvest('week')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 This Week</button>
-        <button onclick="filterKitchenInvest('month')" style="padding:8px;background:var(--cream);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark)">📅 This Month</button>
-      </div>
-
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-        <label style="font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;display:block;margin-bottom:4px">Custom Range</label>
-        <input type="date" id="ki-from" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;margin-bottom:6px;outline:none;color:var(--ink);background:var(--cream)">
-        <input type="date" id="ki-to" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:12px;margin-bottom:6px;outline:none;color:var(--ink);background:var(--cream)">
-        <button onclick="filterKitchenInvest('range')" style="width:100%;padding:8px;background:var(--gold);color:var(--dark);border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Search</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtered Results -->
-  <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-    <div style="padding:12px 16px;background:var(--cream);border-bottom:1px solid var(--border);font-size:13px;font-weight:600">
-      📊 <span id="ki-filter-title">All Expenses</span> - Total: <span id="ki-filter-total">₹0</span>
-    </div>
-    <div id="ki-list" style="padding:16px;max-height:600px;overflow-y:auto"><div style="text-align:center;color:var(--muted);padding:20px">Loading...</div></div>
-  </div>
-</div>
-
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, query, orderBy, getDocs, doc, updateDoc, onSnapshot, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUV8uk7hdxJKh75SlHukoohTtQ1Wd_qLk",
@@ -371,24 +215,24 @@ const MENU = [
     { id:5,  name:'Egg Biryani',       desc:'Biryani with boiled eggs',                   badges:['egg'],       price:80 },
   ]},
   { cat:'Rice & Noodles 🍜', items:[
-    { id:6,  name:'Chicken Fried Rice',  desc:'Fried rice with chicken',                    badges:['nv'],        variants:[{l:'Normal',p:90},{l:'Double Egg',p:100}] },
-    { id:7,  name:'Egg Fried Rice',      desc:'Fried rice with scrambled eggs',             badges:['egg'],       variants:[{l:'Normal',p:70},{l:'Double Egg',p:80}] },
-    { id:8,  name:'Veg Rice',            desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
-    { id:9,  name:'Geera Rice',          desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
-    { id:10, name:'Egg Noodles',         desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
-    { id:11, name:'Chicken Noodles',     desc:'Stir-fried noodles with chicken',            badges:['nv'],        price:90 },
-    { id:12, name:'Veg Noodles',         desc:'Stir-fried noodles with vegetables',         badges:['veg'],       price:60 },
+    { id:6,  name:'Chicken Rice',      desc:'Fried rice with chicken',                    badges:['nv'],        price:90 },
+    { id:7,  name:'Egg Rice',          desc:'Fried rice with scrambled eggs',             badges:['egg'],       price:70 },
+    { id:8,  name:'Veg Rice',          desc:'Vegetable fried rice',                       badges:['veg'],       price:60 },
+    { id:9,  name:'Geera Rice',        desc:'Cumin flavoured basmati rice',               badges:['veg'],       price:80 },
+    { id:10, name:'Egg Noodles',       desc:'Stir-fried noodles with egg',                badges:['egg'],       price:70 },
+    { id:11, name:'Chicken Noodles',   desc:'Stir-fried noodles with chicken',            badges:['nv'],        price:90 },
+    { id:12, name:'Veg Noodles',       desc:'Stir-fried noodles with vegetables',         badges:['veg'],       price:60 },
   ]},
   { cat:'Starters 🔥', items:[
-    { id:13, name:'Chicken Manchuria', desc:'Crispy chicken in spicy Manchurian sauce',   badges:['nv','pop'],  variants:[{l:'Single',p:100},{l:'Full',p:150}] },
-    { id:14, name:'Veg Manchuria',     desc:'Crispy veggie balls in spicy sauce',         badges:['veg'],       price:100 },
+    { id:13, name:'Chicken Manchuria', desc:'Crispy chicken in spicy Manchurian sauce',   badges:['nv','pop'],  price:150 },
+    { id:14, name:'Veg Manchuria',     desc:'Crispy veggie balls in spicy sauce',         badges:['veg'],       price:80 },
     { id:15, name:'Egg Burji',         desc:'Spiced scrambled eggs',                      badges:['egg'],       price:100 },
     { id:16, name:'Egg 65',            desc:'Crispy spiced fried eggs',                   badges:['egg'],       variants:[{l:'Half',p:65},{l:'Full',p:110}] },
     { id:17, name:'Egg Chilli',        desc:'Eggs tossed with peppers and soy sauce',     badges:['egg'],       price:110 },
     { id:18, name:'Egg Manchurian',    desc:'Eggs in tangy Manchurian gravy',             badges:['egg'],       price:100 },
     { id:19, name:'Egg Keema',         desc:'Spiced minced egg masala',                   badges:['egg'],       price:100 },
     { id:20, name:'Corn Fry',          desc:'Crispy fried sweet corn',                    badges:['veg'],       price:120 },
-    { id:56, name:'Omelette',          desc:'Fluffy egg omelette',                        badges:['egg'],       variants:[{l:'Single Egg',p:20},{l:'Double Egg',p:40}] },
+    { id:56, name:'Omlet',             desc:'Fluffy egg omlet',                           badges:['egg'],       price:20 },
   ]},
   { cat:'Chicken Specials 🍗', items:[
     { id:21, name:'Chicken Wings',     desc:'Spicy wings — 6 pieces',                     badges:['nv','pop'],  price:100 },
@@ -405,177 +249,114 @@ const MENU = [
     { id:30, name:'Paneer Curry',      desc:'Soft paneer in flavourful curry',            badges:['veg'],        price:160 },
   ]},
   { cat:'Sea & Meat 🐟', items:[
-    { id:31, name:'Prawns Curry',      desc:'Succulent prawns in gravy',                  badges:['nv'],        price:280 },
-    { id:32, name:'Fish Curry',        desc:'Tender fish in spiced curry',                badges:['nv'],        price:240 },
-    { id:33, name:'Mutton Curry',      desc:'Slow-cooked mutton curry',                   badges:['nv'],        price:260 },
+    { id:31, name:'Fish Fry',          desc:'Crispy spiced fried fish',                   badges:['nv'],        price:120 },
+    { id:32, name:'Boti',              desc:'Tender mutton boti pieces',                  badges:['nv'],        price:150 },
+    { id:33, name:'Head Curry',        desc:'Spiced goat head curry',                     badges:['nv'],        price:180 },
   ]},
-  { cat:'Breads 🥖', items:[
-    { id:34, name:'Naan',              desc:'Soft Indian bread',                          badges:['veg'],       variants:[{l:'Plain',p:30},{l:'Butter',p:40},{l:'Garlic',p:50}] },
+  { cat:'Breads 🫓', items:[
+    { id:34, name:'Chapathi',          desc:'Soft whole wheat flatbread — per piece',     badges:['veg'],        price:10 },
   ]},
   { cat:'Beverages 🥤', items:[
-    { id:35, name:'Mango Lassi',       desc:'Creamy yogurt drink with mango',             badges:['veg'],       price:80 },
-    { id:36, name:'Sweet Lassi',       desc:'Traditional sweet yogurt drink',             badges:['veg'],       price:60 },
-    { id:37, name:'Masala Chai',       desc:'Aromatic spiced tea',                        badges:['veg'],       price:30 },
-    { id:38, name:'Coffee',            desc:'Freshly brewed coffee',                      badges:['veg'],       price:40 },
-    { id:39, name:'Cold Coffee',       desc:'Iced coffee drink',                          badges:['veg'],       price:60 },
-    { id:40, name:'Mango Shake',       desc:'Thick mango milkshake',                      badges:['veg'],       price:100 },
-    { id:41, name:'Banana Shake',      desc:'Creamy banana milkshake',                    badges:['veg'],       price:80 },
-    { id:42, name:'Buttermilk',        desc:'Traditional seasoned buttermilk',            badges:['veg'],       price:40 },
-    { id:43, name:'Lemonade',          desc:'Fresh lemon juice drink',                    badges:['veg'],       price:50 },
+    { id:35, name:'Water',             desc:'Fresh drinking water',                       badges:['veg'],        variants:[{l:'1 Lt',p:20},{l:'2 Lt',p:40}] },
+    { id:36, name:'Thumps Up',         desc:'Citrus soda',                                badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:37, name:'Spirit',            desc:'Orange flavored soda',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:38, name:'Maaza',             desc:'Mango flavored drink',                       badges:['veg'],        variants:[{l:'200ml',p:15},{l:'250ml',p:20},{l:'740ml',p:45},{l:'1 Lt',p:55},{l:'2.25 Lt',p:110}] },
+    { id:39, name:'Monster Energy',    desc:'Energy drink tin',                           badges:['veg'],        price:130 },
+    { id:40, name:'Predator',          desc:'Energy drink tin',                           badges:['veg'],        price:70 },
+    { id:41, name:'Coca Cola',         desc:'Soda tin',                                   badges:['veg'],        price:45 },
+    { id:42, name:'Limka',             desc:'Lemon flavored soda',                        badges:['veg'],        price:20 },
+    { id:43, name:'Soda',              desc:'Plain soda water',                           badges:['veg'],        price:15 },
   ]},
   { cat:'Smokes 🚬', items:[
-    { id:44, name:'Cigarette',         desc:'Regular cigarettes',                         badges:[],            price:10 },
-    { id:45, name:'Beedi',             desc:'Traditional beedi',                          badges:[],            price:5 },
-    { id:46, name:'Pan',               desc:'Areca nut and betel leaf',                   badges:[],            price:15 },
-    { id:47, name:'Pan Masala',        desc:'Flavoured areca nut mix',                    badges:[],            price:10 },
-    { id:48, name:'Gutkha',            desc:'Chewing tobacco product',                    badges:[],            price:20 },
-    { id:49, name:'Khaini',            desc:'Traditional tobacco preparation',            badges:[],            price:15 },
-    { id:50, name:'Zarda',             desc:'Sweetened tobacco product',                  badges:[],            price:25 },
-    { id:51, name:'Hookah',            desc:'Flavoured water pipe tobacco',               badges:[],            variants:[{l:'Single',p:150},{l:'Double',p:250}] },
+    { id:44, name:'Kings',             desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:45, name:'Lights',            desc:'Cigarettes',                                 badges:['nv'],        price:25 },
+    { id:46, name:'Gold Flak',         desc:'Small cigarettes',                           badges:['nv'],        price:15 },
+    { id:47, name:'Connects',          desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:48, name:'Bistal',            desc:'Cigarettes',                                 badges:['nv'],        price:15 },
+    { id:49, name:'American Club',     desc:'Cigarettes',                                 badges:['nv'],        price:20 },
+    { id:50, name:'Silk',              desc:'Cigarettes',                                 badges:['nv'],        price:22 },
+    { id:51, name:'Advance',           desc:'Small cigarettes',                           badges:['nv'],        price:16 },
   ]},
   { cat:'Alcohol 🍺', items:[
-    { id:52, name:'Beer',              desc:'Assorted beers on tap',                      badges:[],            price:150 },
-    { id:53, name:'Wine',              desc:'Red or white wine selection',                badges:[],            price:200 },
-    { id:54, name:'Whiskey',           desc:'Premium whiskey pours',                      badges:[],            price:250 },
-    { id:55, name:'Cocktails',         desc:'House specialty cocktails',                  badges:[],            variants:[{l:'Single',p:200},{l:'Double',p:350}] },
+    { id:52, name:'KF Lite',           desc:'Premium beer lite',                          badges:['nv'],        price:220 },
+    { id:53, name:'KF Strong',         desc:'Premium beer strong',                        badges:['nv'],        price:230 },
+    { id:54, name:'Tuburg Lite',       desc:'Tuburg beer lite',                           badges:['nv'],        price:220 },
+    { id:55, name:'Tuburg Strong',     desc:'Tuburg beer strong',                         badges:['nv'],        price:230 },
   ]},
 ];
 
 let allOrders = [], kitchenFilter = 'all';
 
-// Real-time listener for orders
+// Auth check
 onAuthStateChanged(auth, user => {
   if (!user) window.location.href = 'login.html';
-  else {
-    const today = new Date().toDateString();
-    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-    onSnapshot(q, (snap) => {
-      allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
-      updateStats();
-      renderKitchen();
-    });
-    buildMenuMgmt();
-  }
+  else { startLive(); loadTables(); buildMenuMgmt(); }
 });
 
-function updateStats() {
-  const today = new Date().toDateString();
-  
-  // Convert Firebase timestamps properly
-  const todayOrders = allOrders.filter(o => {
-    let dateStr = o.orderedAt;
-    if (!dateStr && o.createdAt) {
-      if (o.createdAt.toDate) {
-        dateStr = o.createdAt.toDate().toISOString();
-      } else if (typeof o.createdAt === 'string') {
-        dateStr = o.createdAt;
-      }
+// Live kitchen listener
+function startLive() {
+  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+  onSnapshot(q, snap => {
+    allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id })).sort((a, b) => {
+      const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.createdAt).getTime();
+      const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.createdAt).getTime();
+      return timeB - timeA;
+    });
+    renderKitchen();
+    updateStats();
+    // Also update pending orders view if it's currently active
+    if (document.getElementById('view-pending-orders').classList.contains('active')) {
+      loadPendingOrders();
     }
-    if (!dateStr) return false;
-    return new Date(dateStr).toDateString() === today;
+  }, err => {
+    console.error('Firestore error:', err);
+    document.getElementById('kitchen-orders').innerHTML = '<div class="no-orders"><p>Error loading orders: ' + err.message + '</p></div>';
   });
-  
-  const paidOrders = todayOrders.filter(o => o.status === 'paid');
-  const pending = todayOrders.filter(o => o.status === 'pending');
-  const pendingPayment = todayOrders.filter(o => o.status === 'pending-payment');
-  const served = todayOrders.filter(o => o.status !== 'cancelled');
-  const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
-
-  document.getElementById('stat-orders').textContent = todayOrders.length;
-  document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
-  document.getElementById('stat-pending').textContent = pending.length;
-  document.getElementById('stat-pending-payment').textContent = pendingPayment.length;
 }
 
 function renderKitchen() {
+  const el = document.getElementById('kitchen-orders');
+  const filtered = kitchenFilter === 'all'
+    ? allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled' && o.status !== 'paid')
+    : allOrders.filter(o => o.status === kitchenFilter);
+  if (!filtered.length) { el.innerHTML = '<div class="no-orders"><div class="ni">✅</div><p>No orders in this category.</p></div>'; return; }
+  el.innerHTML = filtered.map(o => renderCard(o, true)).join('');
+}
+
+function updateStats() {
   const today = new Date().toDateString();
-  
-  // Convert Firebase timestamps to ISO strings for comparison
-  const todayOrders = allOrders.filter(o => {
-    let dateStr = o.orderedAt;
-    if (!dateStr && o.createdAt) {
-      // Handle Firebase Timestamp
-      if (o.createdAt.toDate) {
-        dateStr = o.createdAt.toDate().toISOString();
-      } else if (typeof o.createdAt === 'string') {
-        dateStr = o.createdAt;
-      }
-    }
-    if (!dateStr) return false;
-    return new Date(dateStr).toDateString() === today;
-  });
-  
-  // Kitchen orders: pending, preparing, ready, served
-  const kitchenOrders = todayOrders.filter(o => ['pending', 'preparing', 'ready', 'served'].includes(o.status));
-  let filtered = kitchenOrders;
-  if (kitchenFilter !== 'all') {
-    filtered = kitchenOrders.filter(o => o.status === kitchenFilter);
-  }
-  
-  // Pending payment orders: ONLY pending-payment (not paid)
-  const paymentOrders = todayOrders.filter(o => o.status === 'pending-payment');
-  
-  // Debug logging
-  console.log('Total orders:', allOrders.length);
-  console.log('Today orders:', todayOrders.length);
-  console.log('Kitchen orders:', kitchenOrders.length);
-  console.log('Filtered:', filtered.length);
-  
-  document.getElementById('kitchen-orders').innerHTML = filtered.length ? 
-    filtered.map(o => renderCard(o, true)).join('') : 
-    '<div class="no-orders" style="grid-column:1/-1"><div class="ni">👨‍🍳</div><p>No orders in this category</p></div>';
-  
-  // Update payment section
-  document.getElementById('payment-count').textContent = paymentOrders.length;
-  document.getElementById('pending-payment-section').innerHTML = paymentOrders.length ?
-    paymentOrders.map(o => renderCard(o, true)).join('') :
-    '<div class="no-orders" style="grid-column:1/-1"><p>No pending payments 🎉</p></div>';
+  const todayOrders = allOrders.filter(o => o.orderedAt && new Date(o.orderedAt).toDateString() === today);
+  const paidOrders = todayOrders.filter(o => o.status === 'paid');
+  const revenue = paidOrders.reduce((a, o) => a + (o.total || 0), 0);
+  const pending = allOrders.filter(o => o.status === 'pending').length;
+  const pendingPayment = allOrders.filter(o => o.status === 'pending-payment').length;
+  document.getElementById('stat-orders').textContent = todayOrders.length;
+  document.getElementById('stat-revenue').textContent = '₹' + revenue.toLocaleString();
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('stat-pending-payment').textContent = pendingPayment;
 }
 
 window.loadAllOrders = async function() {
   const el = document.getElementById('all-orders-list');
   el.innerHTML = '<div class="no-orders"><p>Loading...</p></div>';
-  const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
-  el.innerHTML = snap.docs.map(d => renderCard({ ...d.data(), _id: d.id }, true)).join('');
-};
-
-window.loadKitchen = function() {
-  renderKitchen();
-};
-
-window.loadMenuMgmt = function() {
-  const el = document.getElementById('menu-list');
-  el.innerHTML = MENU.map(section => `
-    <div class="menu-section">
-      <div class="menu-section-header">${section.cat}</div>
-      ${section.items.map(item => `
-        <div class="menu-item-row">
-          <div class="mi-info"><div class="mi-name">${item.name}</div><div class="mi-price">₹${item.price || (item.variants ? item.variants[0].p : 'N/A')}</div></div>
-          <label class="mi-toggle"><input type="checkbox" ${menuStates[item.id] !== false ? 'checked' : ''} onchange="toggleItem(${item.id},this.checked)"><span class="toggle-slider"></span></label>
-        </div>`).join('')}
-    </div>`).join('');
+  try {
+    const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    if (snap.empty) { el.innerHTML = '<div class="no-orders"><p>No orders yet.</p></div>'; return; }
+    let orders = snap.docs.map(d => ({ ...d.data(), _id: d.id })).sort((a, b) => {
+      const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.createdAt).getTime();
+      const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.createdAt).getTime();
+      return timeB - timeA;
+    });
+    el.innerHTML = orders.map(d => renderCard(d, true)).join('');
+  } catch(err) {
+    el.innerHTML = '<div class="no-orders"><p>Error: ' + err.message + '</p></div>';
+  }
 };
 
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
-  const today = new Date().toDateString();
-  
-  const todayOrders = allOrders.filter(o => {
-    let dateStr = o.orderedAt;
-    if (!dateStr && o.createdAt) {
-      if (o.createdAt.toDate) {
-        dateStr = o.createdAt.toDate().toISOString();
-      } else if (typeof o.createdAt === 'string') {
-        dateStr = o.createdAt;
-      }
-    }
-    if (!dateStr) return false;
-    return new Date(dateStr).toDateString() === today;
-  });
-  
-  const pending = todayOrders.filter(o => o.status === 'pending-payment');
+  const pending = allOrders.filter(o => o.status === 'pending-payment');
   if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
 };
@@ -583,23 +364,8 @@ window.loadPendingOrders = function() {
 window.loadTables = function() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
-  const today = new Date().toDateString();
-  
-  const todayOrders = allOrders.filter(o => {
-    let dateStr = o.orderedAt;
-    if (!dateStr && o.createdAt) {
-      if (o.createdAt.toDate) {
-        dateStr = o.createdAt.toDate().toISOString();
-      } else if (typeof o.createdAt === 'string') {
-        dateStr = o.createdAt;
-      }
-    }
-    if (!dateStr) return false;
-    return new Date(dateStr).toDateString() === today;
-  });
-  
-  const occupiedTables = [...new Set(todayOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
-  const readyTables = [...new Set(todayOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
+  const occupiedTables = [...new Set(allOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
+  const readyTables = [...new Set(allOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
   for (let i = 1; i <= 16; i++) {
     const t = String(i);
     const isReady = readyTables.includes(t);
@@ -608,12 +374,13 @@ window.loadTables = function() {
     const statusText = isReady ? '🔔 Food Ready' : isOccupied ? '🍽️ Occupied' : '✓ Available';
     const div = document.createElement('div');
     div.className = 'table-card ' + cls;
-    div.innerHTML = `<div class="table-num">T${i}</div><div class="table-status">${statusText}</div>`;
+    div.innerHTML = `<div class="table-num">${i}</div><div class="table-status">${statusText}</div>`;
     grid.appendChild(div);
   }
 };
 
 async function buildMenuMgmt() {
+  // Load menu item states from Firebase
   let menuStates = {};
   try {
     const snap = await getDocs(collection(db, 'menuItems'));
@@ -663,7 +430,7 @@ function renderCard(o, editable) {
   return `<div class="order-card${isUrgent?' urgent':''}${isPendingPayment?' pending-payment':''}">
     <div class="oc-top">
       <span class="oc-num">${o.orderNumber||'#'+o._id.slice(-4)}</span>
-      <span class="oc-table">${o.tableNumber}</span>
+      <span class="oc-table">Table ${o.tableNumber}</span>
       <span class="status-badge ${sMap[o.status]||'s-pending'}">${o.status||'pending'}</span>
     </div>
     ${itemRows}
@@ -677,7 +444,7 @@ window.setStatus = async function(id, status) {
   try { 
     // Auto-transition: when order is marked "served", automatically set to "pending-payment"
     const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
   }
   catch(e) { alert('Error: ' + e.message); }
 };
@@ -694,258 +461,15 @@ window.showView = function(view, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   el.classList.add('active');
-  if (view === 'kitchen') loadKitchen();
   if (view === 'all-orders') loadAllOrders();
   if (view === 'pending-orders') loadPendingOrders();
   if (view === 'tables') loadTables();
-  if (view === 'menu-mgmt') loadMenuMgmt();
-  if (view === 'investments') loadInvestments();
-  if (view === 'kitchen-invest') loadKitchenInvest();
 };
 
 window.logout = async function() {
   await signOut(auth);
   window.location.href = 'login.html';
 };
-
-// Investment Management
-let allInvestments = [];
-
-window.addInvestment = async function() {
-  const amount = parseFloat(document.getElementById('inv-amount').value);
-  const date = document.getElementById('inv-date').value;
-  const desc = document.getElementById('inv-desc').value;
-  const category = document.getElementById('inv-category').value;
-
-  if (!amount || amount <= 0 || !date || !desc) {
-    alert('Please fill all fields with valid data');
-    return;
-  }
-
-  try {
-    await addDoc(collection(db, 'investments'), {
-      amount: amount,
-      date: date,
-      description: desc,
-      category: category,
-      createdAt: serverTimestamp()
-    });
-    
-    // Clear form
-    document.getElementById('inv-amount').value = '';
-    document.getElementById('inv-date').value = '';
-    document.getElementById('inv-desc').value = '';
-    document.getElementById('inv-category').value = 'Equipment';
-    
-    alert('Investment added successfully!');
-    loadInvestments();
-  } catch (e) {
-    alert('Error adding investment: ' + e.message);
-  }
-};
-
-window.loadInvestments = async function() {
-  try {
-    const q = query(collection(db, 'investments'), orderBy('date', 'desc'));
-    const snap = await getDocs(q);
-    allInvestments = snap.docs.map(d => ({...d.data(), _id: d.id}));
-    
-    // Calculate totals
-    const total = allInvestments.reduce((a, i) => a + i.amount, 0);
-    const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const thisMonth = allInvestments
-      .filter(i => new Date(i.date) >= monthStart)
-      .reduce((a, i) => a + i.amount, 0);
-    
-    document.getElementById('inv-total').textContent = '₹' + total.toLocaleString();
-    document.getElementById('inv-count').textContent = allInvestments.length + ' entries';
-    document.getElementById('inv-month').textContent = '₹' + thisMonth.toLocaleString();
-    
-    // Render list
-    const catEmoji = {Equipment:'🔧', Furniture:'🪑', 'Repairs & Maintenance':'🔨', Renovation:'🏗️', Technology:'💻', Other:'📌'};
-    const html = allInvestments.length ? allInvestments.map(inv => {
-      const invDate = new Date(inv.date).toLocaleDateString('en-IN');
-      return `<div style="padding:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="flex:1">
-          <div style="font-weight:500;color:var(--dark);margin-bottom:4px">${catEmoji[inv.category]||'📌'} ${inv.category}</div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${inv.description}</div>
-          <div style="font-size:11px;color:var(--muted)">${invDate}</div>
-        </div>
-        <div style="text-align:right;font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);font-weight:600;margin-left:16px">₹${inv.amount.toLocaleString()}</div>
-      </div>`;
-    }).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No investments recorded yet</div>';
-    
-    document.getElementById('inv-list').innerHTML = html;
-  } catch (e) {
-    console.error('Error loading investments:', e);
-    document.getElementById('inv-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Error loading investments</div>';
-  }
-};
-
-// Kitchen Daily Investment Management
-let allKitchenInvest = [];
-
-window.addKitchenInvest = async function() {
-  const amount = parseFloat(document.getElementById('ki-amount').value);
-  const date = document.getElementById('ki-date').value;
-  const category = document.getElementById('ki-category').value;
-  const notes = document.getElementById('ki-notes').value;
-
-  if (!amount || amount <= 0 || !date) {
-    alert('Please fill amount and date');
-    return;
-  }
-
-  try {
-    await addDoc(collection(db, 'kitchenInvestments'), {
-      amount: amount,
-      date: date,
-      category: category,
-      notes: notes || '',
-      createdAt: serverTimestamp()
-    });
-    
-    // Clear form
-    document.getElementById('ki-amount').value = '';
-    document.getElementById('ki-date').value = '';
-    document.getElementById('ki-notes').value = '';
-    document.getElementById('ki-category').value = 'Chicken';
-    
-    alert('Kitchen expense added successfully!');
-    loadKitchenInvest();
-  } catch (e) {
-    alert('Error adding expense: ' + e.message);
-  }
-};
-
-let allKitchenInvest = [];
-let kiCurrentFilter = 'all';
-
-window.loadKitchenInvest = async function() {
-  try {
-    const q = query(collection(db, 'kitchenInvestments'), orderBy('date', 'desc'));
-    const snap = await getDocs(q);
-    allKitchenInvest = snap.docs.map(d => ({...d.data(), _id: d.id}));
-    
-    // Calculate stats
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    const monthStartStr = monthStart.toISOString().split('T')[0];
-    
-    // Today
-    const todayData = allKitchenInvest.filter(i => i.date === today);
-    const todayTotal = todayData.reduce((a, i) => a + i.amount, 0);
-    document.getElementById('ki-today').textContent = '₹' + todayTotal.toLocaleString();
-    document.getElementById('ki-today-items').textContent = todayData.length + ' items';
-    
-    // Yesterday
-    const yesterdayData = allKitchenInvest.filter(i => i.date === yesterday);
-    const yesterdayTotal = yesterdayData.reduce((a, i) => a + i.amount, 0);
-    document.getElementById('ki-yesterday').textContent = '₹' + yesterdayTotal.toLocaleString();
-    document.getElementById('ki-yesterday-items').textContent = yesterdayData.length + ' items';
-    
-    // This Week
-    const weekData = allKitchenInvest.filter(i => i.date >= weekStartStr);
-    const weekTotal = weekData.reduce((a, i) => a + i.amount, 0);
-    document.getElementById('ki-week').textContent = '₹' + weekTotal.toLocaleString();
-    document.getElementById('ki-week-items').textContent = weekData.length + ' items';
-    
-    // This Month
-    const monthData = allKitchenInvest.filter(i => i.date >= monthStartStr);
-    const monthTotal = monthData.reduce((a, i) => a + i.amount, 0);
-    document.getElementById('ki-month').textContent = '₹' + monthTotal.toLocaleString();
-    document.getElementById('ki-month-items').textContent = monthData.length + ' items';
-    
-    // Display all by default
-    renderKitchenInvestList(allKitchenInvest, 'All Expenses');
-  } catch (e) {
-    console.error('Error loading kitchen expenses:', e);
-    document.getElementById('ki-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Error loading expenses</div>';
-  }
-};
-
-window.filterKitchenInvest = function(type) {
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-  
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-  const weekStartStr = weekStart.toISOString().split('T')[0];
-  
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  const monthStartStr = monthStart.toISOString().split('T')[0];
-  
-  let filtered = [];
-  let title = '';
-  
-  switch(type) {
-    case 'today':
-      filtered = allKitchenInvest.filter(i => i.date === today);
-      title = 'Today\'s Expenses';
-      break;
-    case 'yesterday':
-      filtered = allKitchenInvest.filter(i => i.date === yesterday);
-      title = 'Yesterday\'s Expenses';
-      break;
-    case 'week':
-      filtered = allKitchenInvest.filter(i => i.date >= weekStartStr);
-      title = 'This Week\'s Expenses';
-      break;
-    case 'month':
-      filtered = allKitchenInvest.filter(i => i.date >= monthStartStr);
-      title = 'This Month\'s Expenses';
-      break;
-    case 'range':
-      const from = document.getElementById('ki-from').value;
-      const to = document.getElementById('ki-to').value;
-      if (!from || !to) {
-        alert('Please select both dates');
-        return;
-      }
-      filtered = allKitchenInvest.filter(i => i.date >= from && i.date <= to);
-      const fromDate = new Date(from).toLocaleDateString('en-IN');
-      const toDate = new Date(to).toLocaleDateString('en-IN');
-      title = `${fromDate} to ${toDate}`;
-      break;
-  }
-  
-  renderKitchenInvestList(filtered, title);
-};
-
-function renderKitchenInvestList(items, title) {
-  const catEmoji = {
-    Chicken:'🍗', Meat:'🥩', Vegetables:'🥬', Rice:'🍚', Oil:'🛢️', 
-    Gas:'🔥', Water:'💧', 'Cool drinks':'🥤', Packaging:'📦', Other:'📌'
-  };
-  
-  const total = items.reduce((a, i) => a + i.amount, 0);
-  document.getElementById('ki-filter-title').textContent = title;
-  document.getElementById('ki-filter-total').textContent = '₹' + total.toLocaleString();
-  
-  const html = items.length ? items.map(item => {
-    const itemDate = new Date(item.date).toLocaleDateString('en-IN');
-    const notesText = item.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:500">${item.notes}</div>` : '';
-    return `<div style="padding:12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">
-      <div style="flex:1">
-        <div style="font-weight:500;color:var(--dark);margin-bottom:2px">${catEmoji[item.category]||'📌'} ${item.category}</div>
-        <div style="font-size:11px;color:var(--muted)">${itemDate}</div>
-        ${notesText}
-      </div>
-      <div style="text-align:right;font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);font-weight:600;margin-left:16px">₹${item.amount.toLocaleString()}</div>
-    </div>`;
-  }).join('') : '<div style="text-align:center;padding:20px;color:var(--muted)">No expenses found</div>';
-  
-  document.getElementById('ki-list').innerHTML = html;
-}
 
 // Check hash for direct kitchen link
 if (window.location.hash === '#kitchen') {
