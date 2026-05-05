@@ -553,6 +553,14 @@ window.placeOrder = async () => {
   const num = '#' + Math.floor(1000 + Math.random() * 9000);
   
   try {
+    // Check if this table has any existing orders
+    const existingOrders = await getDocs(query(
+      collection(db, 'orders'),
+      where('tableNumber', '==', String(tableNum))
+    ));
+    
+    const isNewOrderFromSameTable = !existingOrders.empty;
+    
     // ALWAYS CREATE A NEW ORDER - Don't merge with existing orders
     // Each order is separate and independent
     await addDoc(collection(db, 'orders'), {
@@ -561,11 +569,12 @@ window.placeOrder = async () => {
       specialRequest: document.getElementById('special-req').value.trim(),
       subtotal: sub, 
       total: sub,
-      status: 'pending',  // ALL new orders start as pending in Kitchen
+      status: 'pending',  // ALWAYS start as pending in Kitchen
       orderNumber: num,
       orderedAt: new Date().toISOString(), 
       createdAt: serverTimestamp(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      isNewOrderFromTable: isNewOrderFromSameTable  // Flag to mark new orders from same table
     });
     
     document.getElementById('order-num').textContent = num;

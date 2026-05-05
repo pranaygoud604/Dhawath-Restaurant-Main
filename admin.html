@@ -499,14 +499,14 @@ function renderKitchen() {
     return new Date(dateStr).toDateString() === today;
   });
   
-  // Kitchen orders: pending, preparing, ready, served
+  // ===== KITCHEN SECTION - ONLY pending, preparing, ready, served =====
   const kitchenOrders = todayOrders.filter(o => ['pending', 'preparing', 'ready', 'served'].includes(o.status));
   let filtered = kitchenOrders;
   if (kitchenFilter !== 'all') {
     filtered = kitchenOrders.filter(o => o.status === kitchenFilter);
   }
   
-  // GROUP ORDERS BY TABLE - Merge display for same table
+  // GROUP ORDERS BY TABLE - Merge display for same table (KITCHEN ORDERS ONLY)
   const tableGroups = {};
   filtered.forEach(o => {
     const table = o.tableNumber;
@@ -516,7 +516,7 @@ function renderKitchen() {
     tableGroups[table].push(o);
   });
   
-  // RENDER MERGED ORDERS BY TABLE
+  // RENDER MERGED ORDERS BY TABLE - KITCHEN SECTION
   const mergedHTML = Object.entries(tableGroups)
     .sort((a, b) => a[0].localeCompare(b[0])) // Sort by table name
     .map(([table, orders]) => {
@@ -525,11 +525,15 @@ function renderKitchen() {
       const orderIds = [];
       let totalAmount = 0;
       let highestStatus = 'pending';
+      let newOrderCount = 0;
       
       orders.forEach(o => {
         if (o.items) allItems.push(...o.items);
         totalAmount += o.total || 0;
         orderIds.push(o._id);
+        
+        // Count new orders from same table
+        if (o.isNewOrderFromTable) newOrderCount++;
         
         // Determine highest status (most advanced in kitchen)
         const statusPriority = { pending: 1, preparing: 2, ready: 3, served: 4 };
@@ -556,6 +560,7 @@ function renderKitchen() {
       // Create merged card
       const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served' };
       const orderNums = orders.map(o => o.orderNumber || '#' + o._id.slice(-4)).join(' + ');
+      const newBadge = newOrderCount > 0 ? `<span style="background:#E74C3C;color:white;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:600">🆕 NEW (${newOrderCount})</span>` : '';
       
       return `
         <div class="order-card">
@@ -564,7 +569,10 @@ function renderKitchen() {
             <span class="oc-table" style="background:var(--gold-light);border:2px solid var(--gold)">Table ${table}</span>
             <span class="status-badge ${sMap[highestStatus] || 's-pending'}">${highestStatus}</span>
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📦 ${orders.length} order${orders.length > 1 ? 's' : ''} merged</div>
+          <div style="display:flex;gap:10px;margin-bottom:8px;font-size:11px">
+            <div style="color:var(--muted)">📦 ${orders.length} order${orders.length > 1 ? 's' : ''}</div>
+            ${newBadge}
+          </div>
           ${itemRows}
           <div class="oc-footer">
             <span class="oc-total">₹${totalAmount}</span>
@@ -585,7 +593,7 @@ function renderKitchen() {
   document.getElementById('kitchen-orders').innerHTML = mergedHTML || 
     '<div class="no-orders" style="grid-column:1/-1"><div class="ni">👨‍🍳</div><p>No orders in this category</p></div>';
   
-  // Pending payment orders: ONLY pending-payment (not paid)
+  // ===== PENDING PAYMENTS SECTION - ONLY pending-payment status =====
   const paymentOrders = todayOrders.filter(o => o.status === 'pending-payment');
   
   // GROUP PENDING PAYMENTS BY TABLE TOO
