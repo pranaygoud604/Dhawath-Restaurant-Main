@@ -445,6 +445,13 @@ onAuthStateChanged(auth, user => {
     const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
     onSnapshot(q, (snap) => {
       allOrders = snap.docs.map(d => ({ ...d.data(), _id: d.id }));
+      
+      // DEBUG: Log all orders with their statuses
+      console.log('📥 ORDERS FETCHED FROM FIREBASE:');
+      allOrders.forEach(o => {
+        console.log(`  Order ${o.orderNumber} (Table ${o.tableNumber}): status = "${o.status}"`);
+      });
+      
       updateStats();
       renderKitchen();
     });
@@ -501,6 +508,13 @@ function renderKitchen() {
   
   // ===== KITCHEN SECTION - ONLY pending, preparing, ready, served =====
   const kitchenOrders = todayOrders.filter(o => ['pending', 'preparing', 'ready', 'served'].includes(o.status));
+  
+  console.log('🔍 DEBUG renderKitchen:');
+  console.log('  Total orders:', allOrders.length);
+  console.log('  Today orders:', todayOrders.length);
+  console.log('  Kitchen orders (pending/preparing/ready/served):', kitchenOrders.length);
+  console.log('  Kitchen orders detail:', kitchenOrders.map(o => ({id: o._id.slice(-4), table: o.tableNumber, status: o.status, num: o.orderNumber})));
+  
   let filtered = kitchenOrders;
   if (kitchenFilter !== 'all') {
     filtered = kitchenOrders.filter(o => o.status === kitchenFilter);

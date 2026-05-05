@@ -553,33 +553,28 @@ window.placeOrder = async () => {
   const num = '#' + Math.floor(1000 + Math.random() * 9000);
   
   try {
-    // Check if this table has any existing orders
-    const existingOrders = await getDocs(query(
-      collection(db, 'orders'),
-      where('tableNumber', '==', String(tableNum))
-    ));
-    
-    const isNewOrderFromSameTable = !existingOrders.empty;
-    
-    // ALWAYS CREATE A NEW ORDER - Don't merge with existing orders
-    // Each order is separate and independent
+    // 🔥 CRITICAL: ALWAYS create order with status 'pending'
+    // DO NOT check for existing orders - each order is independent
+    // Even if previous order from same table is in pending-payment
     await addDoc(collection(db, 'orders'), {
       tableNumber: String(tableNum),
       items: newItems,
       specialRequest: document.getElementById('special-req').value.trim(),
       subtotal: sub, 
       total: sub,
-      status: 'pending',  // ALWAYS start as pending in Kitchen
+      status: 'pending',  // 🔴 MUST BE 'pending' - new orders go to KITCHEN FIRST
       orderNumber: num,
       orderedAt: new Date().toISOString(), 
       createdAt: serverTimestamp(),
-      updatedAt: new Date(),
-      isNewOrderFromTable: isNewOrderFromSameTable  // Flag to mark new orders from same table
+      updatedAt: new Date()
     });
+    
+    console.log('✅ NEW ORDER CREATED: status=pending (will appear in KITCHEN ORDERS)');
     
     document.getElementById('order-num').textContent = num;
     document.getElementById('modal').classList.add('open');
   } catch (e) { 
+    console.error('❌ Order creation failed:', e);
     alert('Failed: ' + e.message); 
     btn.disabled = false; 
     lbl.textContent = 'Place Order'; 
