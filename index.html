@@ -550,46 +550,25 @@ window.placeOrder = async () => {
   lbl.innerHTML = '<span class="spinner"></span> Saving...';
   const sub = Object.values(cart).reduce((a, c) => a + c.linePrice * c.qty, 0);
   const newItems = Object.values(cart).map(c => ({ id:c.id, name:c.name, qty:c.qty, variant:c.variant||null, price:c.linePrice, lineTotal:c.linePrice*c.qty }));
+  const num = '#' + Math.floor(1000 + Math.random() * 9000);
   
   try {
-    // Check if there's an existing unpaid order for this table (includes pending-payment status)
-    const existingSnap = await getDocs(query(
-      collection(db, 'orders'), 
-      where('tableNumber', '==', String(tableNum)),
-      where('status', 'in', ['pending', 'preparing', 'ready', 'served', 'pending-payment'])
-    ));
+    // ALWAYS CREATE A NEW ORDER - Don't merge with existing orders
+    // Each order is separate and independent
+    await addDoc(collection(db, 'orders'), {
+      tableNumber: String(tableNum),
+      items: newItems,
+      specialRequest: document.getElementById('special-req').value.trim(),
+      subtotal: sub, 
+      total: sub,
+      status: 'pending',  // ALL new orders start as pending in Kitchen
+      orderNumber: num,
+      orderedAt: new Date().toISOString(), 
+      createdAt: serverTimestamp(),
+      updatedAt: new Date()
+    });
     
-    if (!existingSnap.empty) {
-      // Found an existing unpaid order - add items to it
-      const existingOrder = existingSnap.docs[0];
-      const existingData = existingOrder.data();
-      const mergedItems = [...(existingData.items || []), ...newItems];
-      const newTotal = existingData.total + sub;
-      
-      await updateDoc(doc(db, 'orders', existingOrder.id), {
-        items: mergedItems,
-        total: newTotal,
-        subtotal: (existingData.subtotal || existingData.total) + sub
-      });
-      
-      document.getElementById('order-num').textContent = existingData.orderNumber || '#' + existingOrder.id.slice(-4);
-    } else {
-      // No existing order - create a new one
-      const num = '#' + Math.floor(1000 + Math.random() * 9000);
-      await addDoc(collection(db, 'orders'), {
-        tableNumber: String(tableNum),
-        items: newItems,
-        specialRequest: document.getElementById('special-req').value.trim(),
-        subtotal: sub, 
-        total: sub,
-        status: 'pending', 
-        orderNumber: num,
-        orderedAt: new Date().toISOString(), 
-        createdAt: serverTimestamp()
-      });
-      document.getElementById('order-num').textContent = num;
-    }
-    
+    document.getElementById('order-num').textContent = num;
     document.getElementById('modal').classList.add('open');
   } catch (e) { 
     alert('Failed: ' + e.message); 

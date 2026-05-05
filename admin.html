@@ -506,23 +506,153 @@ function renderKitchen() {
     filtered = kitchenOrders.filter(o => o.status === kitchenFilter);
   }
   
+  // GROUP ORDERS BY TABLE - Merge display for same table
+  const tableGroups = {};
+  filtered.forEach(o => {
+    const table = o.tableNumber;
+    if (!tableGroups[table]) {
+      tableGroups[table] = [];
+    }
+    tableGroups[table].push(o);
+  });
+  
+  // RENDER MERGED ORDERS BY TABLE
+  const mergedHTML = Object.entries(tableGroups)
+    .sort((a, b) => a[0].localeCompare(b[0])) // Sort by table name
+    .map(([table, orders]) => {
+      // Merge all items from all orders for this table
+      const allItems = [];
+      const orderIds = [];
+      let totalAmount = 0;
+      let highestStatus = 'pending';
+      
+      orders.forEach(o => {
+        if (o.items) allItems.push(...o.items);
+        totalAmount += o.total || 0;
+        orderIds.push(o._id);
+        
+        // Determine highest status (most advanced in kitchen)
+        const statusPriority = { pending: 1, preparing: 2, ready: 3, served: 4 };
+        if (statusPriority[o.status] > statusPriority[highestStatus]) {
+          highestStatus = o.status;
+        }
+      });
+      
+      // Consolidate items (count duplicates)
+      const itemMap = {};
+      allItems.forEach(i => {
+        const key = i.name + (i.variant || '');
+        if (!itemMap[key]) {
+          itemMap[key] = { ...i, qty: 0, lineTotal: 0 };
+        }
+        itemMap[key].qty += i.qty;
+        itemMap[key].lineTotal += i.lineTotal || (i.price * i.qty);
+      });
+      
+      const itemRows = Object.values(itemMap)
+        .map(i => `<div class="oc-item-row"><span>${i.name}${i.variant ? ' (' + i.variant + ')' : ''} ×${i.qty}</span><span>₹${i.lineTotal}</span></div>`)
+        .join('');
+      
+      // Create merged card
+      const sMap = { pending: 's-pending', preparing: 's-preparing', ready: 's-ready', served: 's-served' };
+      const orderNums = orders.map(o => o.orderNumber || '#' + o._id.slice(-4)).join(' + ');
+      
+      return `
+        <div class="order-card">
+          <div class="oc-top">
+            <span class="oc-num">${orderNums}</span>
+            <span class="oc-table" style="background:var(--gold-light);border:2px solid var(--gold)">Table ${table}</span>
+            <span class="status-badge ${sMap[highestStatus] || 's-pending'}">${highestStatus}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📦 ${orders.length} order${orders.length > 1 ? 's' : ''} merged</div>
+          ${itemRows}
+          <div class="oc-footer">
+            <span class="oc-total">₹${totalAmount}</span>
+            <span class="oc-time">${orders[0].orderedAt ? new Date(orders[0].orderedAt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : '—'}</span>
+          </div>
+          <div class="status-btns">
+            ${['pending', 'preparing', 'ready', 'served'].filter(s => {
+              const statusPriority = { pending: 1, preparing: 2, ready: 3, served: 4 };
+              return statusPriority[s] >= statusPriority[highestStatus];
+            }).map(s => `<button class="s-btn${highestStatus===s?' active':''}" onclick="updateTableStatus('${orderIds.join(',')}','${s}')">${s}</button>`).join('')}
+            <button class="s-btn cancel" onclick="updateTableStatus('${orderIds.join(',')}','cancelled')">cancel</button>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+  
+  document.getElementById('kitchen-orders').innerHTML = mergedHTML || 
+    '<div class="no-orders" style="grid-column:1/-1"><div class="ni">👨‍🍳</div><p>No orders in this category</p></div>';
+  
   // Pending payment orders: ONLY pending-payment (not paid)
   const paymentOrders = todayOrders.filter(o => o.status === 'pending-payment');
   
-  // Debug logging
-  console.log('Total orders:', allOrders.length);
-  console.log('Today orders:', todayOrders.length);
-  console.log('Kitchen orders:', kitchenOrders.length);
-  console.log('Filtered:', filtered.length);
+  // GROUP PENDING PAYMENTS BY TABLE TOO
+  const paymentGroups = {};
+  paymentOrders.forEach(o => {
+    const table = o.tableNumber;
+    if (!paymentGroups[table]) {
+      paymentGroups[table] = [];
+    }
+    paymentGroups[table].push(o);
+  });
   
-  document.getElementById('kitchen-orders').innerHTML = filtered.length ? 
-    filtered.map(o => renderCard(o, true)).join('') : 
-    '<div class="no-orders" style="grid-column:1/-1"><div class="ni">👨‍🍳</div><p>No orders in this category</p></div>';
+  const paymentHTML = Object.entries(paymentGroups)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([table, orders]) => {
+      const allItems = [];
+      const orderIds = [];
+      let totalAmount = 0;
+      
+      orders.forEach(o => {
+        if (o.items) allItems.push(...o.items);
+        totalAmount += o.total || 0;
+        orderIds.push(o._id);
+      });
+      
+      const itemMap = {};
+      allItems.forEach(i => {
+        const key = i.name + (i.variant || '');
+        if (!itemMap[key]) {
+          itemMap[key] = { ...i, qty: 0, lineTotal: 0 };
+        }
+        itemMap[key].qty += i.qty;
+        itemMap[key].lineTotal += i.lineTotal || (i.price * i.qty);
+      });
+      
+      const itemRows = Object.values(itemMap)
+        .map(i => `<div class="oc-item-row"><span>${i.name}${i.variant ? ' (' + i.variant + ')' : ''} ×${i.qty}</span><span>₹${i.lineTotal}</span></div>`)
+        .join('');
+      
+      const orderNums = orders.map(o => o.orderNumber || '#' + o._id.slice(-4)).join(' + ');
+      
+      return `
+        <div class="order-card pending-payment">
+          <div class="oc-top">
+            <span class="oc-num">${orderNums}</span>
+            <span class="oc-table" style="background:var(--gold-light);border:2px solid var(--gold)">Table ${table}</span>
+            <span class="status-badge s-pending-payment">pending-payment</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">📦 ${orders.length} order${orders.length > 1 ? 's' : ''} merged</div>
+          ${itemRows}
+          <div class="oc-footer">
+            <span class="oc-total">₹${totalAmount}</span>
+            <span class="oc-time">💳 Payment Pending</span>
+          </div>
+          <div class="status-btns">
+            <button class="s-btn active" onclick="updateTableStatus('${orderIds.join(',')}','pending-payment')">pending-payment</button>
+            <button class="s-btn" onclick="updateTableStatus('${orderIds.join(',')}','paid')">paid</button>
+            <button class="s-btn cancel" onclick="updateTableStatus('${orderIds.join(',')}','cancelled')">cancel</button>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
   
   // Update payment section
   document.getElementById('payment-count').textContent = paymentOrders.length;
-  document.getElementById('pending-payment-section').innerHTML = paymentOrders.length ?
-    paymentOrders.map(o => renderCard(o, true)).join('') :
+  document.getElementById('pending-payment-section').innerHTML = paymentHTML ||
     '<div class="no-orders" style="grid-column:1/-1"><p>No pending payments 🎉</p></div>';
 }
 
@@ -639,9 +769,29 @@ window.setStatus = async function(id, status) {
   try { 
     // Auto-transition: when order is marked "served", automatically set to "pending-payment"
     const finalStatus = (status === 'served') ? 'pending-payment' : status;
-    await updateDoc(doc(db, 'orders', id), { status: finalStatus }); 
+    await updateDoc(doc(db, 'orders', id), { status: finalStatus, updatedAt: new Date() }); 
   }
   catch(e) { alert('Error: ' + e.message); }
+};
+
+// Update status for multiple orders (same table)
+window.updateTableStatus = async function(orderIds, status) {
+  try {
+    const ids = orderIds.split(',');
+    const finalStatus = (status === 'served') ? 'pending-payment' : status;
+    
+    // Update all orders for this table
+    for (const id of ids) {
+      await updateDoc(doc(db, 'orders', id.trim()), { 
+        status: finalStatus,
+        updatedAt: new Date()
+      });
+    }
+    
+    // Re-render kitchen after all updates
+    renderKitchen();
+  }
+  catch(e) { alert('Error updating orders: ' + e.message); }
 };
 
 window.filterKitchen = function(f, el) {
