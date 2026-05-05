@@ -460,7 +460,21 @@ onAuthStateChanged(auth, user => {
 
 function updateStats() {
   const today = new Date().toDateString();
-  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  
+  // Convert Firebase timestamps properly
+  const todayOrders = allOrders.filter(o => {
+    let dateStr = o.orderedAt;
+    if (!dateStr && o.createdAt) {
+      if (o.createdAt.toDate) {
+        dateStr = o.createdAt.toDate().toISOString();
+      } else if (typeof o.createdAt === 'string') {
+        dateStr = o.createdAt;
+      }
+    }
+    if (!dateStr) return false;
+    return new Date(dateStr).toDateString() === today;
+  });
+  
   const paidOrders = todayOrders.filter(o => o.status === 'paid');
   const pending = todayOrders.filter(o => o.status === 'pending');
   const pendingPayment = todayOrders.filter(o => o.status === 'pending-payment');
@@ -475,7 +489,21 @@ function updateStats() {
 
 function renderKitchen() {
   const today = new Date().toDateString();
-  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  
+  // Convert Firebase timestamps to ISO strings for comparison
+  const todayOrders = allOrders.filter(o => {
+    let dateStr = o.orderedAt;
+    if (!dateStr && o.createdAt) {
+      // Handle Firebase Timestamp
+      if (o.createdAt.toDate) {
+        dateStr = o.createdAt.toDate().toISOString();
+      } else if (typeof o.createdAt === 'string') {
+        dateStr = o.createdAt;
+      }
+    }
+    if (!dateStr) return false;
+    return new Date(dateStr).toDateString() === today;
+  });
   
   // Kitchen orders: pending, preparing, ready, served
   const kitchenOrders = todayOrders.filter(o => ['pending', 'preparing', 'ready', 'served'].includes(o.status));
@@ -486,6 +514,12 @@ function renderKitchen() {
   
   // Pending payment orders: ONLY pending-payment (not paid)
   const paymentOrders = todayOrders.filter(o => o.status === 'pending-payment');
+  
+  // Debug logging
+  console.log('Total orders:', allOrders.length);
+  console.log('Today orders:', todayOrders.length);
+  console.log('Kitchen orders:', kitchenOrders.length);
+  console.log('Filtered:', filtered.length);
   
   document.getElementById('kitchen-orders').innerHTML = filtered.length ? 
     filtered.map(o => renderCard(o, true)).join('') : 
@@ -527,7 +561,20 @@ window.loadMenuMgmt = function() {
 window.loadPendingOrders = function() {
   const el = document.getElementById('pending-orders-list');
   const today = new Date().toDateString();
-  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  
+  const todayOrders = allOrders.filter(o => {
+    let dateStr = o.orderedAt;
+    if (!dateStr && o.createdAt) {
+      if (o.createdAt.toDate) {
+        dateStr = o.createdAt.toDate().toISOString();
+      } else if (typeof o.createdAt === 'string') {
+        dateStr = o.createdAt;
+      }
+    }
+    if (!dateStr) return false;
+    return new Date(dateStr).toDateString() === today;
+  });
+  
   const pending = todayOrders.filter(o => o.status === 'pending-payment');
   if (!pending.length) { el.innerHTML = '<div class="no-orders"><p>No pending payments 🎉</p></div>'; return; }
   el.innerHTML = pending.map(o => renderCard(o, true)).join('');
@@ -537,7 +584,20 @@ window.loadTables = function() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
   const today = new Date().toDateString();
-  const todayOrders = allOrders.filter(o => new Date(o.orderedAt||o.createdAt).toDateString() === today);
+  
+  const todayOrders = allOrders.filter(o => {
+    let dateStr = o.orderedAt;
+    if (!dateStr && o.createdAt) {
+      if (o.createdAt.toDate) {
+        dateStr = o.createdAt.toDate().toISOString();
+      } else if (typeof o.createdAt === 'string') {
+        dateStr = o.createdAt;
+      }
+    }
+    if (!dateStr) return false;
+    return new Date(dateStr).toDateString() === today;
+  });
+  
   const occupiedTables = [...new Set(todayOrders.filter(o => o.status !== 'served' && o.status !== 'cancelled').map(o => o.tableNumber))];
   const readyTables = [...new Set(todayOrders.filter(o => o.status === 'ready').map(o => o.tableNumber))];
   for (let i = 1; i <= 16; i++) {
